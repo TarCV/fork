@@ -1,4 +1,14 @@
-[![Build Status](https://travis-ci.org/shazam/fork.svg?branch=master)](https://travis-ci.org/shazam/fork)  [![Codacy Badge](https://api.codacy.com/project/badge/Grade/848eae2d11bc422caec3ac215557f38c)](https://www.codacy.com/app/i-giannakakis/fork?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shazam/fork&amp;utm_campaign=Badge_Grade)
+Goals of this branch
+====================
+[ ] Use JUnit 4 facilities to get list of test methods to execute
+ (possibly with childs created by runners such as Parameterized)
+
+[ ] Support all the runners provided out of box in  ASTL
+
+
+
+***Original README content below***
+===================================
 
 Fork tools
 ==========
