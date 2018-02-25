@@ -10,7 +10,6 @@
 
 apply plugin: 'java'
 apply plugin: 'application'
-apply from: '../build-scripts/gradle-mvn-push.gradle'
 
 mainClassName = 'com.shazam.chimprunner.ChimpCli'
 

@@ -9,7 +9,6 @@
  */
 
 apply plugin: 'java'
-apply from: '../build-scripts/gradle-mvn-push.gradle'
 
 //noinspection GroovyUnusedAssignment
 sourceCompatibility = rootProject.sourceCompatibility
