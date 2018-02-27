@@ -10,7 +10,9 @@
 
 package com.shazam.chimprunner;
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.TestCaseEvent;
@@ -20,8 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
+import static com.shazam.fork.utils.DdmsUtils.properlySetMethodName;
 import static java.lang.String.format;
 
 public class PerformanceTestRunner {
@@ -56,7 +62,7 @@ public class PerformanceTestRunner {
                 device.getDeviceInterface());
         String testClassName = testCaseEvent.getTestClass();
         String testMethodName = testCaseEvent.getTestMethod();
-        androidTestRunner.setMethodName(testClassName, testMethodName);
+        properlySetMethodName(androidTestRunner, testClassName, testMethodName);
         androidTestRunner.setMaxtimeToOutputResponse(Defaults.ADB_MAX_TIME_TO_OUTPUT_RESPONSE);
         try {
             PerformanceTestListener performanceTestListener = new LoggingPerformanceTestListener(testCaseEvent, results);

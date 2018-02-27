@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
+import static com.shazam.fork.utils.DdmsUtils.properlySetMethodName;
 import static java.lang.String.format;
 
 class TestRun {
@@ -64,7 +65,7 @@ class TestRun {
 			runner.setTestSize(testSize);
 		}
 		runner.setRunName(poolName);
-		runner.setMethodName(testClassName, testMethodName);
+		properlySetMethodName(runner, testClassName, testMethodName);
 		runner.setMaxtimeToOutputResponse(testRunParameters.getTestOutputTimeout());
 
         if (testRunParameters.isCoverageEnabled()) {
@@ -84,6 +85,7 @@ class TestRun {
 		permissionGrantingManager.revokePermissions(applicationPackage, device, permissionsToRevoke);
 
 		try {
+			logger.error("Cmd: " + runner.getAmInstrumentCommand());
 			runner.run(testRunListeners);
 		} catch (ShellCommandUnresponsiveException | TimeoutException e) {
 			logger.warn("Test: " + testClassName + " got stuck. You can increase the timeout in settings if it's too strict");
