@@ -5,7 +5,7 @@ Goals of this fork
 
  - [ ] Support all the runners provided out of box in  ASTL
 
- - [ ] Support cases where only some testcases are disabled on some
+ - [ ] Support cases where some testcases are disabled on some
   devices via annotations
 
  - [ ] Support custom filters
