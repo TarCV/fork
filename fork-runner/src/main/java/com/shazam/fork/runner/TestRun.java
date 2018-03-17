@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static com.shazam.fork.utils.DdmsUtils.properlySetMethodName;
+import static com.shazam.fork.utils.DdmsUtils.properlyAddInstrumentationArg;
 import static java.lang.String.format;
 
 class TestRun {
@@ -65,8 +65,12 @@ class TestRun {
 			runner.setTestSize(testSize);
 		}
 		runner.setRunName(poolName);
-		properlySetMethodName(runner, testClassName, testMethodName);
 		runner.setMaxtimeToOutputResponse(testRunParameters.getTestOutputTimeout());
+
+		// Custom filter is required to support Parameterized tests with default names
+		runner.addInstrumentationArg("filter", "com.shazam.fork.ondevice.ClassMethodFilter");
+		properlyAddInstrumentationArg(runner, "filterClass", testClassName);
+		properlyAddInstrumentationArg(runner, "filterMethod", testMethodName);
 
         if (testRunParameters.isCoverageEnabled()) {
             runner.setCoverage(true);

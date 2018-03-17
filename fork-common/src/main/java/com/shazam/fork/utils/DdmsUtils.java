@@ -22,7 +22,28 @@ public class DdmsUtils {
             RemoteAndroidTestRunner runner,
             String testClassName,
             String testMethodName) {
-        String escapedMethodName = (testClassName + "#" + testMethodName).replaceAll("'", "\\'");
-        runner.setClassName(String.format("'%s'", escapedMethodName));
+        String escapedMethodName = escapeArgumentForCommandLine(testClassName + "#" + testMethodName);
+        runner.setClassName(escapedMethodName);
+    }
+
+    /**
+     * Properly sets string argument for the passed runner
+     *
+     * {@link RemoteAndroidTestRunner} has bug that string values are not properly quoted
+     * for command line. This method provides a workaround.
+     *
+     * @param runner Method name to quote
+     * @param name  Argument name to use
+     * @param value Argument value to use
+     */
+    public static void properlyAddInstrumentationArg(RemoteAndroidTestRunner runner,
+                                                     String name,
+                                                     String value) {
+        String escapedValue = escapeArgumentForCommandLine(value);
+        runner.addInstrumentationArg(name, escapedValue);
+    }
+
+    private static String escapeArgumentForCommandLine(String value) {
+        return String.format("'%s'", value.replaceAll("'", "\\'"));
     }
 }

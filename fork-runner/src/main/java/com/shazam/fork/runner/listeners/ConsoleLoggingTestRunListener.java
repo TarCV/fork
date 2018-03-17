@@ -14,6 +14,7 @@ package com.shazam.fork.runner.listeners;
 
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.runner.ProgressReporter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +85,7 @@ class ConsoleLoggingTestRunListener extends NoOpITestRunListener {
     }
 
     private String testCase(TestIdentifier test) {
-        return test.toString().replaceAll(testPackage, "");
+        return String.valueOf(test).replaceAll(testPackage, "");
     }
 
     private String progress() {
