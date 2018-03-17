@@ -1,11 +1,18 @@
-Goals of this branch
-====================
-[ ] Use JUnit 4 facilities to get list of test methods to execute
+Goals of this fork
+==================
+ - [ ] Use JUnit 4 facilities to get list of test methods to execute
  (possibly with childs created by runners such as Parameterized)
 
-[ ] Support all the runners provided out of box in  ASTL
+ - [ ] Support all the runners provided out of box in  ASTL
 
+ - [ ] Support cases where some testcases are disabled on some
+  devices via annotations
 
+ - [ ] Support custom filters
+
+ - [ ] Option to clean/reinstall tested app before testcase execution
+
+ - [ ] Restore support of original Fork annotations
 
 ***Original README content below***
 ===================================
