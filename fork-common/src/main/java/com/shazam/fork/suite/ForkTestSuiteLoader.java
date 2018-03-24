@@ -13,6 +13,7 @@ package com.shazam.fork.suite;
 
 import com.shazam.fork.io.DexFileExtractor;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 
 import org.jf.dexlib.AnnotationDirectoryItem;
 import org.jf.dexlib.AnnotationItem;
@@ -56,7 +57,7 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
     }
 
     @Override
-    public Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException {
+    public TestEventQueue loadTestSuite() throws NoTestCasesFoundException {
         List<TestCaseEvent> testCaseEvents = dexFileExtractor.getDexFiles(instrumentationApkFile).stream()
                 .map(dexFile -> dexFile.ClassDefsSection.getItems())
                 .flatMap(Collection::stream)
@@ -68,7 +69,7 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
         if (testCaseEvents.isEmpty()) {
             throw new NoTestCasesFoundException("No tests cases were found in the test APK: " + instrumentationApkFile.getAbsolutePath());
         }
-        return testCaseEvents;
+        return new TestEventQueue(testCaseEvents);
     }
 
     @Nonnull

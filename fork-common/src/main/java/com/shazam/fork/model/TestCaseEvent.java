@@ -3,9 +3,10 @@ package com.shazam.fork.model;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.google.common.base.Objects;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -20,7 +21,7 @@ public class TestCaseEvent {
     private final List<String> permissionsToRevoke;
     private final Map<String, String> properties;
 
-    private TestCaseEvent(String testMethod, String testClass, boolean isIgnored, List<String> permissionsToRevoke, Map<String, String> properties) {
+    TestCaseEvent(String testMethod, String testClass, boolean isIgnored, List<String> permissionsToRevoke, Map<String, String> properties) {
         this.testMethod = testMethod;
         this.testClass = testClass;
         this.isIgnored = isIgnored;

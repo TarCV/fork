@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Shazam Entertainment Limited
+ * Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -10,8 +10,23 @@
 
 package com.shazam.fork.suite;
 
-import com.shazam.fork.model.TestEventQueue;
+import com.android.ddmlib.testrunner.TestIdentifier;
+import com.shazam.fork.model.Device;
 
-public interface TestSuiteLoader {
-    TestEventQueue loadTestSuite() throws NoTestCasesFoundException;
+class DeviceTestPair {
+    private final Device device;
+    private final TestIdentifier testIdentifier;
+
+    DeviceTestPair(Device device, TestIdentifier testIdentifier) {
+        this.device = device;
+        this.testIdentifier = testIdentifier;
+    }
+
+    public Device getDevice() {
+        return device;
+    }
+
+    public TestIdentifier getTestIdentifier() {
+        return testIdentifier;
+    }
 }

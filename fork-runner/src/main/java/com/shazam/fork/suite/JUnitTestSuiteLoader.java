@@ -21,8 +21,9 @@ import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.model.Device;
+import com.shazam.fork.model.LimitedTestCaseEvent;
 import com.shazam.fork.model.Pool;
-import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.pooling.NoDevicesForPoolException;
 import com.shazam.fork.pooling.NoPoolLoaderConfiguredException;
 import com.shazam.fork.pooling.PoolLoader;
@@ -34,14 +35,22 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.shazam.fork.Utils.namedExecutor;
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 import static com.shazam.fork.injector.system.InstallerInjector.installer;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 public class JUnitTestSuiteLoader implements TestSuiteLoader {
     private final Logger logger = LoggerFactory.getLogger(JUnitTestSuiteLoader.class);
@@ -54,21 +63,19 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
     }
 
     @Override
-    public Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException {
-        // 1. Ask instrumentation runner to provide list of testcases for us
-        Set<TestIdentifier> knownTests = askDevicesForTests();
-
-        // TODO: match list of testcases with annotations
-
-        return knownTests.stream()
-                .map(TestCaseEvent::newTestCase)
-                .collect(Collectors.toList());
+    public TestEventQueue loadTestSuite() throws NoTestCasesFoundException {
+        Stream<DeviceTestPair> knownTestsPairs = askDevicesForTests();
+        List<LimitedTestCaseEvent> limitedTestCaseEvents = buildTestSlotList(knownTestsPairs);
+        if (limitedTestCaseEvents.isEmpty()) {
+            throw new NoTestCasesFoundException("No compatible tests cases were found");
+        }
+        return new TestEventQueue(limitedTestCaseEvents);
     }
 
-    private Set<TestIdentifier> askDevicesForTests() {
+    private Stream<DeviceTestPair> askDevicesForTests() {
         ExecutorService poolExecutor = null;
         try {
-            TestCollectingListener testCollector = new TestCollectingListener();
+            List<TestCollectingListener> testCollectors = Collections.synchronizedList(new ArrayList<>());
             Collection<Pool> pools = poolLoader.loadPools();
             int numberOfPools = pools.size();
             CountDownLatch poolCountDownLatch = new CountDownLatch(numberOfPools);
@@ -88,6 +95,8 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                             final Installer installer = installer();
                             final Configuration configuration = configuration();
                             for (Device device : pool.getDevices()) {
+                                TestCollectingListener testCollector = new TestCollectingListener(device);
+                                testCollectors.add(testCollector);
                                 Runnable deviceTestRunner = new Runnable() {
                                     @Override
                                     public void run() {
@@ -111,7 +120,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                                             try {
                                                 runner.run(testRunListeners);
                                             } catch (ShellCommandUnresponsiveException | TimeoutException e) {
-                                                logger.warn("Test runner got stuck and test list collection was interrupeted. " +
+                                                logger.warn("Test runner got stuck and test list collection was interrupted. " +
                                                         " Depending on number of available devices some tests will not be run." +
                                                         " You can increase the timeout in settings if it's too strict");
                                             } catch (AdbCommandRejectedException | IOException e) {
@@ -142,7 +151,9 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
             }
             poolCountDownLatch.await();
             logger.info("Successfully loaded test cases");
-            return testCollector.getTests();
+
+            return testCollectors.stream()
+                    .flatMap(testCollector -> testCollector.getTests().stream());
         } catch (NoPoolLoaderConfiguredException | NoDevicesForPoolException e) {
             // TODO: replace with concrete exception
             throw new RuntimeException("Configuring devices and pools failed." +
@@ -155,6 +166,17 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                 poolExecutor.shutdown();
             }
         }
+    }
+
+    private static List<LimitedTestCaseEvent> buildTestSlotList(Stream<DeviceTestPair> deviceTestPairStream) {
+        Map<TestIdentifier, Set<Device>> testDevicesMap = deviceTestPairStream.collect(groupingBy(
+                DeviceTestPair::getTestIdentifier,
+                mapping(DeviceTestPair::getDevice, toSet())));
+        return testDevicesMap.entrySet().stream()
+                .map(testIdentifierSetEntry -> new LimitedTestCaseEvent(testIdentifierSetEntry.getKey(), testIdentifierSetEntry.getValue()))
+                .sorted(Comparator.comparingInt(o -> o.getSupportedDevices().size()))
+                    // To make execution optimal tests supporting the least devices should be first
+                .collect(toList());
     }
 
 }
