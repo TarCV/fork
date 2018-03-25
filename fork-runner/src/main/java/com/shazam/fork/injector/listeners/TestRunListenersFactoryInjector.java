@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Shazam Entertainment Limited
+ * Derivative work is Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -10,17 +11,18 @@
 
 package com.shazam.fork.injector.listeners;
 
+import com.shazam.fork.runner.listeners.TestCaseRunListenersFactory;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
-import static com.shazam.fork.injector.system.FileManagerInjector.fileManager;
 import static com.shazam.fork.injector.GsonInjector.gson;
+import static com.shazam.fork.injector.system.FileManagerInjector.fileManager;
 
 public class TestRunListenersFactoryInjector {
 
     private TestRunListenersFactoryInjector() {}
 
     public static TestRunListenersFactory testRunListenersFactory() {
-        return new TestRunListenersFactory(configuration(), fileManager(), gson());
+        return new TestCaseRunListenersFactory(configuration(), fileManager(), gson());
     }
 }

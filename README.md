@@ -2,10 +2,13 @@ Goals of this fork
 ==================
  - [x] Use JUnit 4 facilities to get list of test methods to execute
  (possibly with childs created by runners such as Parameterized)
+ **This feature breaks support of original Fork annotations**
 
- - [ ] Support all the runners provided out of box in  ASTL
+ - [ ] Support all the runners supported out of box in ASTL
 
- - [ ] Support cases where some testcases are disabled on some
+ - [ ] Support all the runners from JUnit 4
+
+ - [x] Support cases where some testcases are disabled on some
   devices via annotations
 
  - [ ] Support custom filters

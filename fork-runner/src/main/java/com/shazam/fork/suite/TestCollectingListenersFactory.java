@@ -9,21 +9,30 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.shazam.fork.runner.listeners;
+package com.shazam.fork.suite;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.runner.ProgressReporter;
+import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
-public interface TestRunListenersFactory {
-    List<ITestRunListener> createTestListeners(TestCaseEvent testCase,
-                                               Device device,
-                                               Pool pool,
-                                               ProgressReporter progressReporter,
-                                               Queue<TestCaseEvent> testCaseEventQueue);
+class TestCollectingListenersFactory implements TestRunListenersFactory {
+    private final List<TestCollectingListener> testCollectors;
+
+    TestCollectingListenersFactory(List<TestCollectingListener> testCollectors) {
+        this.testCollectors = testCollectors;
+    }
+
+    @Override
+    public List<ITestRunListener> createTestListeners(TestCaseEvent testCase, Device device, Pool pool, ProgressReporter progressReporter, Queue<TestCaseEvent> testCaseEventQueue) {
+        TestCollectingListener testCollector = new TestCollectingListener(device);
+        testCollectors.add(testCollector);
+        return Collections.singletonList(testCollector);
+    }
 }

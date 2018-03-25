@@ -22,7 +22,7 @@ import java.util.Set;
 public class LimitedTestCaseEvent extends TestCaseEvent {
     private final Set<Device> supportedDevices;
     public LimitedTestCaseEvent(TestIdentifier identifier, Set<Device> supportedDevices) {
-        super(identifier.getClassName(), identifier.getTestName(), false, Collections.emptyList(), Collections.emptyMap());
+        super(identifier.getTestName(), identifier.getClassName(), false, Collections.emptyList(), Collections.emptyMap());
         this.supportedDevices = Collections.unmodifiableSet(new HashSet<>(supportedDevices));
     }
 

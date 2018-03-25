@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 Shazam Entertainment Limited
- * Derivative work is Copyright 2018 TarCV
+ * Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -8,8 +7,11 @@
  *
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
-package com.shazam.fork.runner;
 
-public interface TestRun {
-    void execute();
+package com.shazam.fork.suite;
+
+import java.util.stream.Stream;
+
+public interface DeviceTestPairsLoader {
+    Stream<DeviceTestPair> askDevicesForTests();
 }
