@@ -1,5 +1,13 @@
 language: android
 
+android:
+  components:
+    - tools
+    - tools
+    - platform-tools
+    - build-tools-27.0.3
+    - android-26
+
 jdk:
   - oraclejdk8
 
@@ -16,4 +24,4 @@ cache:
     - $HOME/.android/build-cache
 
 install:
- - yes | sdkmanager --licenses
+ - yes | sdkmanager "platforms;android-26"
