@@ -6,7 +6,7 @@ android:
     - tools
     - platform-tools
     - build-tools-27.0.3
-    - android-26
+    - android-27
 
 jdk:
   - oraclejdk8
@@ -24,4 +24,4 @@ cache:
     - $HOME/.android/build-cache
 
 install:
- - yes | sdkmanager "platforms;android-26"
+ - yes | sdkmanager "platforms;android-27"
