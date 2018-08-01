@@ -1,5 +1,7 @@
 Goals of this fork
 ==================
+![build status](https://travis-ci.org/TarCV/fork.svg?branch=ju-suiteprovider)
+
  - [x] Use JUnit 4 facilities to get list of test methods to execute
  (possibly with childs created by runners such as Parameterized)
 
