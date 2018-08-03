@@ -100,7 +100,7 @@ subprojects {
     }
 
     afterEvaluate { currentProject ->
-        [/*install.repositories.mavenInstaller,*/ uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured { pom ->
+        [install.repositories.mavenInstaller, uploadArchives.repositories.mavenDeployer]*.pom*.whenConfigured { pom ->
             pom.dependencies
                     .each { dep ->
                 if (dep.groupId == 'com.github.tarcv.fork') {
