@@ -114,25 +114,23 @@ subprojects {
             sign configurations.archives
         }
 
-        if (!isAndroidProject(currentProject)) {
-            task javadocJar(type: Jar) {
-                classifier = 'javadoc'
-                from javadoc
-            }
-
-            task sourcesJar(type: Jar) {
-                classifier = 'sources'
-                from sourceSets.main.allSource
-            }
-
-            artifacts {
-                archives javadocJar, sourcesJar
-            }
-
-            jacocoTestReport.dependsOn test
-            jacocoTestReport.reports.html.enabled false
-            jacocoTestReport.reports.xml.enabled true
+        task javadocJar(type: Jar) {
+            classifier = 'javadoc'
+            from javadoc
         }
+
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        artifacts {
+            archives javadocJar, sourcesJar
+        }
+
+        jacocoTestReport.dependsOn test
+        jacocoTestReport.reports.html.enabled false
+        jacocoTestReport.reports.xml.enabled true
 
         // Weirdly archives are signed even if signing.required {false}, so also skipping task explicitly.
         // signArchives.onlyIf {!VERSION_NAME.endsWith("SNAPSHOT")}
