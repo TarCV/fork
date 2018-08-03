@@ -11,6 +11,7 @@ package com.shazam.fork.runner;
 
 import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
@@ -79,6 +80,9 @@ class TestRun {
 			logger.info("No excluding any test based on annotations");
 		}
 
+		clearPackageData(device, applicationPackage);
+		clearPackageData(device, testRunParameters.getTestPackage());
+
 		List<String> permissionsToRevoke = testRunParameters.getTest().getPermissionsToRevoke();
 
 		permissionGrantingManager.revokePermissions(applicationPackage, device, permissionsToRevoke);
@@ -94,4 +98,16 @@ class TestRun {
 		}
 
     }
+
+	private void clearPackageData(IDevice device, String applicationPackage) {
+		long start = System.currentTimeMillis();
+
+		try {
+			device.executeShellCommand(format("pm clear %s", applicationPackage), new NullOutputReceiver());
+		} catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException e) {
+			throw new UnsupportedOperationException(format("Unable to clear package data (%s)", applicationPackage), e);
+		}
+
+		logger.debug("Clearing application data: {} (took {}ms)", applicationPackage, (System.currentTimeMillis() - start));
+	}
 }
