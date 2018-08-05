@@ -1,4 +1,4 @@
-package com.github.tarcv.forkbugdemo;
+package com.github.tarcv.test;
 
 import android.support.test.rule.ActivityTestRule;
 
@@ -13,15 +13,17 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
+import static com.github.tarcv.forkbugdemo.Config.TEST_DURATION;
+import static com.github.tarcv.test.Config.TEST_DURATION;
 import static org.hamcrest.core.AllOf.allOf;
 
 @RunWith(Parameterized.class)
-public class ParameterizedTest {
+public class ParameterizedNamedTest {
     @Rule
     public ActivityTestRule<MainActivity> rule = new ActivityTestRule<>(
             MainActivity.class, true, true);
 
-    public ParameterizedTest(int param) {
+    public ParameterizedNamedTest(int param) {
 
     }
 
@@ -32,9 +34,11 @@ public class ParameterizedTest {
                         isDisplayed(),
                         withText("Hello World!")
                 )));
+
+        Thread.sleep(TEST_DURATION);
     }
 
-    @Parameters
+    @Parameters(name = "param = {0}")
     public static Object[] data() {
         return new Object[] { 1, 2, 3 };
     }

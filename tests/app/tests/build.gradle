@@ -1,0 +1,12 @@
+apply plugin: 'kotlin'
+apply plugin: 'application'
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    testImplementation 'junit:junit:4.12'
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    testImplementation group: 'org.json', name: 'json', version: '20180130'
+}
+
+sourceCompatibility = "1.8"
+targetCompatibility = "1.8"
