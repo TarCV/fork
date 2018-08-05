@@ -3,15 +3,27 @@ language: android
 android:
   components:
     - tools
-    - tools
     - platform-tools
+    - tools
     - build-tools-27.0.3
-    - android-27
+
+before_install:
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - touch ~/.android/repositories.cfg
+  - sdkmanager --update >/dev/null
+  - sdkmanager tools >/dev/null
+  - sdkmanager emulator >/dev/null
+  - sdkmanager "platforms;android-27" >/dev/null
+  - sdkmanager "platforms;android-25" >/dev/null
+  - sdkmanager "platforms;android-18" >/dev/null
+  - sdkmanager "system-images;android-25;google_apis;armeabi-v7a" >/dev/null
+  - sdkmanager "system-images;android-18;google_apis;armeabi-v7a" >/dev/null
 
 jdk:
   - oraclejdk8
 
-sudo: false
+sudo: required
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -23,5 +35,5 @@ cache:
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
 
-install:
- - yes | sdkmanager "platforms;android-27"
+script:
+  - tests/app/test.sh
