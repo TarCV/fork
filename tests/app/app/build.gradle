@@ -10,7 +10,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.github.tarcv.forktestapp"
-        minSdkVersion 21
+        minSdkVersion 18
         targetSdkVersion 27
         versionCode 1
         versionName "1.0"
@@ -33,6 +33,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'com.github.tarcv.fork:fork-ondevice'
 }
 
 // Execute `./gradlew --stop` to fix "com.shazam.fork.pooling.NoDevicesForPoolException: No devices found." error
