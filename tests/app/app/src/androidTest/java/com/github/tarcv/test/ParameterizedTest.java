@@ -13,7 +13,6 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
-import static com.github.tarcv.forkbugdemo.Config.TEST_DURATION;
 import static com.github.tarcv.test.Config.TEST_DURATION;
 import static org.hamcrest.core.AllOf.allOf;
 
