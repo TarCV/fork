@@ -20,22 +20,22 @@ adb devices </dev/null | while read line
 do
     if [ ! "$line" = "" ] && [ `echo $line | awk '{print $2}'` = "device" ]
     then
-        ANDROID_SERIAL=`echo $line | awk '{print $1}'`
+        DEVICE=`echo $line | awk '{print $1}'`
         date
-        echo "Waiting for $ANDROID_SERIAL..."
-        adb wait-for-device </dev/null
+        echo "Waiting for $DEVICE..."
+        adb -s ${DEVICE} wait-for-device </dev/null
         set +x
-        while [ "`timeout 15s adb -s shell getprop sys.boot_completed </dev/null | tr -d '\r' `" != "1" ] ; do printf .; sleep 1; done
+        while [ "`timeout 15s adb -s ${DEVICE} shell getprop sys.boot_completed </dev/null | tr -d '\r' `" != "1" ] ; do printf .; sleep 1; done
         set -x
-        adb shell input keyevent 82 </dev/null
+        adb -s ${DEVICE} shell input keyevent 82 </dev/null
         # TODO: Fork itself should set these globals
-        adb shell settings put global window_animation_scale 0 </dev/null
-        adb shell settings put global transition_animation_scale 0 </dev/null
-        adb shell settings put global animator_duration_scale 0 </dev/null
+        adb -s ${DEVICE} shell settings put global window_animation_scale 0 </dev/null
+        adb -s ${DEVICE} shell settings put global transition_animation_scale 0 </dev/null
+        adb -s ${DEVICE} shell settings put global animator_duration_scale 0 </dev/null
         echo "Emulator online"
     fi
 done
-ANDROID_SERIAL=''
+DEVICE=''
 
 ./gradlew :app:fork
 ./gradlew :app:test
