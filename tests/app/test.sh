@@ -4,39 +4,45 @@ set -ex
 
 cd `dirname "$0"`
 
+cat $(which android-wait-for-emulator)
+
 echo no | avdmanager create avd --force -n fork-tests-24 -k "system-images;android-24;google_apis;armeabi-v7a"
 echo no | avdmanager create avd --force -n fork-tests-18 -k "system-images;android-18;google_apis;armeabi-v7a"
 
-QEMU_AUDIO_DRV=none ${ANDROID_HOME}/emulator/emulator -avd fork-tests-24 -engine classic -no-window -camera-back none -camera-front none -verbose -qemu -m 1536 &
-#QEMU_AUDIO_DRV=none ${ANDROID_HOME}/emulator/emulator -avd fork-tests-18 -no-window -camera-back none -camera-front none -verbose -qemu -m 512 &
+function wait_for_connectible {
+    echo "Waiting for ${EMULATOR_NUM} emulators to be online..."
+    set +x
+    while [ "`adb devices | awk '{print $2}' | grep device | wc -l`" != "${EMULATOR_NUM}" ] ; do printf .; sleep 1; done
+    echo "${EMULATOR_NUM} emulators connected. Waiting for them to be online..."
+    set -x
+}
 
-echo "Waiting for 1 emulators to be online..."
-set +x
-while [ "`adb devices | awk '{print $2}' | grep device | wc -l`" != "1" ] ; do printf .; sleep 1; done
-echo "1 emulators connected. Waiting for them to be online..."
-set -x
+function wait_for_boot_and_setup {
+    date
+    echo "Waiting for $ANDROID_SERIAL..."
+    adb wait-for-device get-serialno </dev/null
+    set +e
+    until [[ "`timeout -s 9 60s adb shell getprop init.svc.bootanim 2>&1 </dev/null`" =~ "stopped" ]] ; do printf .; sleep 1; done
+    set -e
+    adb shell input keyevent 82 </dev/null
+    # TODO: Fork itself should set these globals
+    adb shell settings put global window_animation_scale 0 </dev/null
+    adb shell settings put global transition_animation_scale 0 </dev/null
+    adb shell settings put global animator_duration_scale 0 </dev/null
+}
 
-adb devices </dev/null | while read line
-do
-    if [ ! "$line" = "" ] && [ `echo $line | awk '{print $2}'` = "device" ]
-    then
-        DEVICE=`echo $line | awk '{print $1}'`
-        date
-        echo "Waiting for $DEVICE..."
-        adb -s ${DEVICE} wait-for-device </dev/null
-        android-wait-for-emulator
-#        set +e
-#        while [ "`timeout -s 9 60s adb -s ${DEVICE} shell getprop sys.boot_completed </dev/null | tr -d '\r' `" != "1" ] ; do printf .; sleep 1; done
-#        set -e
-        adb -s ${DEVICE} shell input keyevent 82 </dev/null
-        # TODO: Fork itself should set these globals
-        adb -s ${DEVICE} shell settings put global window_animation_scale 0 </dev/null
-        adb -s ${DEVICE} shell settings put global transition_animation_scale 0 </dev/null
-        adb -s ${DEVICE} shell settings put global animator_duration_scale 0 </dev/null
-        echo "Emulator online"
-    fi
-done
-DEVICE=''
+EMULATOR_NUM=1
 
+QEMU_AUDIO_DRV=none ${ANDROID_HOME}/emulator/emulator -avd fork-tests-24 -engine classic -no-boot-anim -wipe-data -no-snapshot -no-window -camera-back none -camera-front none -verbose -qemu -m 1536 &
+wait_for_connectible
+wait_for_boot_and_setup
+
+QEMU_AUDIO_DRV=none ${ANDROID_HOME}/emulator/emulator -avd fork-tests-18 -engine classic -no-boot-anim -wipe-data -no-snapshot -no-window -camera-back none -camera-front none -verbose -qemu -m 512 &
+ANDROID_SERIAL='emulator-5556'
+export ANDROID_SERIAL
+wait_for_connectible
+wait_for_boot_and_setup
+
+ANDROID_SERIAL=''
 ./gradlew :app:fork
 ./gradlew :app:test
