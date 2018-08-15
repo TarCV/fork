@@ -42,6 +42,9 @@ dependencies {
 fork {
     title = "Acceptance tests"
 
+    totalAllowedRetryQuota = 4
+    retryPerTestCaseQuota = 2
+
     poolingStrategy {
         computed {
             characteristic = "sw"
