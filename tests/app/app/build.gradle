@@ -46,12 +46,10 @@ fork {
     retryPerTestCaseQuota = 2
 
     poolingStrategy {
-        computed {
-            characteristic = "sw"
-            groups {
-                allDevices = 0
+        manual {
+            groupings {
+                emulators = ["emulator-5554", "emulator-5556"]
             }
         }
     }
 }
-
