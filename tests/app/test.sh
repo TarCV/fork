@@ -43,6 +43,13 @@ export ANDROID_SERIAL
 wait_for_connectible
 wait_for_boot_and_setup
 
+
+set +e
 ANDROID_SERIAL=''
-./gradlew :app:fork
-./gradlew :app:test
+
+GRADLE_OPTS="-Dorg.gradle.logging.level=quiet -Dorg.gradle.console=plain"
+export GRADLE_OPTS
+./gradlew --info :app:fork
+./gradlew --info :app:test
+
+cat build/reports/fork/debugAndroidTest/summary/*.json
