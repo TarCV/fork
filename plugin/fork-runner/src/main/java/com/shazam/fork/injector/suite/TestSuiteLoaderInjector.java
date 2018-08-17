@@ -15,12 +15,13 @@ import com.shazam.fork.suite.JUnitTestSuiteLoader;
 import com.shazam.fork.suite.TestSuiteLoader;
 
 import static com.shazam.fork.injector.pooling.PoolLoaderInjector.poolLoader;
+import static com.shazam.fork.injector.runner.RemoteAndroidTestRunnerFactoryInjector.remoteAndroidTestRunnerFactory;
 
 public class TestSuiteLoaderInjector {
 
     private TestSuiteLoaderInjector() {}
 
     public static TestSuiteLoader testSuiteLoader() {
-        return new JUnitTestSuiteLoader(poolLoader());
+        return new JUnitTestSuiteLoader(poolLoader(), remoteAndroidTestRunnerFactory());
     }
 }

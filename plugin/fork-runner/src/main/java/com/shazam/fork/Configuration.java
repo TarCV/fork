@@ -13,6 +13,7 @@
 package com.shazam.fork;
 
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
+import com.shazam.fork.runner.TestRunParameters;
 import com.shazam.fork.system.axmlparser.ApplicationInfo;
 import com.shazam.fork.system.axmlparser.ApplicationInfoFactory;
 import com.shazam.fork.system.axmlparser.InstrumentationInfo;
@@ -30,6 +31,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.NONE;
 import static com.shazam.fork.system.axmlparser.InstrumentationInfoFactory.parseFromFile;
 import static java.util.Arrays.asList;
 
@@ -57,6 +59,7 @@ public class Configuration implements ForkConfiguration {
     private final PoolingStrategy poolingStrategy;
     private final boolean autoGrantPermissions;
     private final String excludedAnnotation;
+    private final ForkIntegrationTestRunType forkIntegrationTestRunType;
 
     private ApplicationInfo applicationInfo;
 
@@ -82,6 +85,7 @@ public class Configuration implements ForkConfiguration {
         poolingStrategy = builder.poolingStrategy;
         autoGrantPermissions = builder.autoGrantPermissions;
         this.excludedAnnotation = builder.excludedAnnotation;
+        this.forkIntegrationTestRunType = builder.forkIntegrationTestRunType;
         this.applicationInfo = builder.applicationInfo;
     }
 
@@ -208,6 +212,11 @@ public class Configuration implements ForkConfiguration {
         return applicationInfo;
     }
 
+    @Override
+    public ForkIntegrationTestRunType getForkIntegrationTestRunType() {
+        return forkIntegrationTestRunType;
+    }
+
     public static class Builder {
         private File androidSdk;
         private File applicationApk;
@@ -231,6 +240,7 @@ public class Configuration implements ForkConfiguration {
         private boolean autoGrantPermissions;
         private String excludedAnnotation;
         private ApplicationInfo applicationInfo;
+        private ForkIntegrationTestRunType forkIntegrationTestRunType = NONE;
 
         public static Builder configuration() {
             return new Builder();
@@ -323,6 +333,11 @@ public class Configuration implements ForkConfiguration {
 
         public Builder withExcludedAnnotation(String excludedAnnotation) {
             this.excludedAnnotation = excludedAnnotation;
+            return this;
+        }
+
+        public Builder withForkIntegrationTestRunType(ForkIntegrationTestRunType forkIntegrationTestRunType) {
+            this.forkIntegrationTestRunType = forkIntegrationTestRunType;
             return this;
         }
 

@@ -12,6 +12,7 @@ package com.shazam.fork.runner;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.shazam.fork.Configuration;
+import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.*;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
@@ -53,12 +54,21 @@ public class TestRunFactory {
                 device,
                 pool,
                 progressReporter,
-                queueOfTestsInPool);
+                queueOfTestsInPool,
+                configuration.getForkIntegrationTestRunType());
+
+        IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory;
+        if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN) {
+            remoteAndroidTestRunnerFactory = new TestAndroidTestRunnerFactory();
+        } else {
+            remoteAndroidTestRunnerFactory = new RemoteAndroidTestRunnerFactory();
+        }
 
         return new TestRun(
                 pool.getName(),
                 testRunParameters,
                 testRunListeners,
-                permissionGrantingManager());
+                permissionGrantingManager(),
+                remoteAndroidTestRunnerFactory);
     }
 }

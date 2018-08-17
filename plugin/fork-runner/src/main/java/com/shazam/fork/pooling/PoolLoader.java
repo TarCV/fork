@@ -13,14 +13,18 @@ package com.shazam.fork.pooling;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.PoolingStrategy;
 import com.shazam.fork.device.DeviceLoader;
+import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Devices;
+import com.shazam.fork.model.DisplayGeometry;
 import com.shazam.fork.model.Pool;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Collections;
 
+import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN;
 import static java.lang.String.format;
 
 public class PoolLoader {
@@ -34,25 +38,52 @@ public class PoolLoader {
     }
 
     public Collection<Pool> loadPools() throws NoDevicesForPoolException, NoPoolLoaderConfiguredException {
-        Devices devices = deviceLoader.loadDevices();
-        if (devices.getDevices().isEmpty()) {
-            throw new NoDevicesForPoolException("No devices found.");
-        }
+        if (configuration.getForkIntegrationTestRunType() == STUB_PARALLEL_TESTRUN) {
+            Device device18 = createStubDevice("fork-5554", 18);
+            Device device27 = createStubDevice("fork-5556", 27);
 
-        DevicePoolLoader devicePoolLoader = pickPoolLoader(configuration);
-        logger.info("Picked {}", devicePoolLoader.getClass().getSimpleName());
-        Collection<Pool> pools = devicePoolLoader.loadPools(devices);
-        if (pools.isEmpty()) {
-            throw new IllegalArgumentException("No pools were found with your configuration. Please review connected devices");
-        }
-        log(pools);
-        for (Pool pool : pools) {
-            if (pool.isEmpty()) {
-                throw new NoDevicesForPoolException(format("Pool %s is empty", pool.getName()));
+            Pool pool = new Pool.Builder()
+                    .withName("Stub 2 device pool")
+                    .addDevice(device18)
+                    .addDevice(device27)
+                    .build();
+
+            return Collections.singletonList(pool);
+        } else {
+            Devices devices = deviceLoader.loadDevices();
+            if (devices.getDevices().isEmpty()) {
+                throw new NoDevicesForPoolException("No devices found.");
             }
-        }
 
-        return pools;
+            DevicePoolLoader devicePoolLoader = pickPoolLoader(configuration);
+            logger.info("Picked {}", devicePoolLoader.getClass().getSimpleName());
+            Collection<Pool> pools = devicePoolLoader.loadPools(devices);
+            if (pools.isEmpty()) {
+                throw new IllegalArgumentException("No pools were found with your configuration. Please review connected devices");
+            }
+            log(pools);
+            for (Pool pool : pools) {
+                if (pool.isEmpty()) {
+                    throw new NoDevicesForPoolException(format("Pool %s is empty", pool.getName()));
+                }
+            }
+
+            return pools;
+        }
+    }
+
+    private Device createStubDevice(String serial, int api) {
+        String manufacturer = "fork";
+        String model = "Emu-" + api;
+        StubDevice stubDevice = new StubDevice(serial, manufacturer, model, serial, api, "");
+        return new Device.Builder()
+                .withApiLevel(String.valueOf(api))
+                .withDisplayGeometry(new DisplayGeometry(640))
+                .withManufacturer(manufacturer)
+                .withModel(model)
+                .withSerial(serial)
+                .withDeviceInterface(stubDevice)
+                .build();
     }
 
     private void log(Collection<Pool> configuredPools) {

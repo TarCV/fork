@@ -20,12 +20,15 @@ import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.Configuration;
+import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.pooling.NoDevicesForPoolException;
 import com.shazam.fork.pooling.NoPoolLoaderConfiguredException;
 import com.shazam.fork.pooling.PoolLoader;
+import com.shazam.fork.runner.IRemoteAndroidTestRunnerFactory;
+import com.shazam.fork.runner.listeners.RecordingTestRunListener;
 import com.shazam.fork.system.adb.Installer;
 
 import org.slf4j.Logger;
@@ -46,11 +49,13 @@ import static com.shazam.fork.injector.system.InstallerInjector.installer;
 public class JUnitTestSuiteLoader implements TestSuiteLoader {
     private final Logger logger = LoggerFactory.getLogger(JUnitTestSuiteLoader.class);
     private final PoolLoader poolLoader;
+    private final IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory;
 
     public JUnitTestSuiteLoader(
-            PoolLoader poolLoader
-    ) {
+            PoolLoader poolLoader,
+            IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory) {
         this.poolLoader = poolLoader;
+        this.remoteAndroidTestRunnerFactory = remoteAndroidTestRunnerFactory;
     }
 
     @Override
@@ -96,18 +101,23 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                                             DdmPreferences.setTimeOut(30000);
                                             installer.prepareInstallation(deviceInterface);
 
-                                            RemoteAndroidTestRunner runner = new RemoteAndroidTestRunner(
-                                                    configuration.getInstrumentationPackage(),
-                                                    configuration.getTestRunnerClass(),
-                                                    deviceInterface);
+                                            RemoteAndroidTestRunner runner =
+                                                    remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(
+                                                            configuration.getInstrumentationPackage(),
+                                                            configuration.getTestRunnerClass(),
+                                                            deviceInterface);
 
                                             runner.setRunName(poolName);
                                             runner.setMaxtimeToOutputResponse((int) configuration.getTestOutputTimeout());
 
+                                            runner.addBooleanArg("log", true);
+
                                             Collection<ITestRunListener> testRunListeners = new ArrayList<>();
                                             testRunListeners.add(testCollector);
+                                            if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS) {
+                                                testRunListeners.add(new RecordingTestRunListener(device, true));
+                                            }
 
-                                            runner.addBooleanArg("log", true);
                                             try {
                                                 runner.run(testRunListeners);
                                             } catch (ShellCommandUnresponsiveException | TimeoutException e) {

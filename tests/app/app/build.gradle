@@ -52,4 +52,6 @@ fork {
             }
         }
     }
+
+    forkIntegrationTestRunType = com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN
 }

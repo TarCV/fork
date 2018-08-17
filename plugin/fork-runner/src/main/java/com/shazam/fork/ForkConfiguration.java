@@ -65,5 +65,13 @@ public interface ForkConfiguration {
 
     String getExcludedAnnotation();
 
+    ForkIntegrationTestRunType getForkIntegrationTestRunType();
+
     ApplicationInfo getApplicationInfo();
+
+    enum ForkIntegrationTestRunType {
+        NONE,
+        STUB_PARALLEL_TESTRUN,
+        RECORD_LISTENER_EVENTS
+    }
 }

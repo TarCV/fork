@@ -37,25 +37,26 @@ class TestRun {
 	private final TestRunParameters testRunParameters;
 	private final List<ITestRunListener> testRunListeners;
 	private final PermissionGrantingManager permissionGrantingManager;
+	private final IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory;
 
 	public TestRun(String poolName,
 				   TestRunParameters testRunParameters,
 				   List<ITestRunListener> testRunListeners,
-				   PermissionGrantingManager permissionGrantingManager) {
+				   PermissionGrantingManager permissionGrantingManager,
+				   IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory) {
         this.poolName = poolName;
 		this.testRunParameters = testRunParameters;
 		this.testRunListeners = testRunListeners;
 		this.permissionGrantingManager = permissionGrantingManager;
+		this.remoteAndroidTestRunnerFactory = remoteAndroidTestRunnerFactory;
 	}
 
 	public void execute() {
 		String applicationPackage = testRunParameters.getApplicationPackage();
 		IDevice device = testRunParameters.getDeviceInterface();
 
-		RemoteAndroidTestRunner runner = new RemoteAndroidTestRunner(
-				testRunParameters.getTestPackage(),
-				testRunParameters.getTestRunner(),
-				device);
+		RemoteAndroidTestRunner runner =
+				remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(testRunParameters.getTestPackage(), testRunParameters.getTestRunner(), device);
 
 		TestCaseEvent test = testRunParameters.getTest();
 		String testClassName = test.getTestClass();

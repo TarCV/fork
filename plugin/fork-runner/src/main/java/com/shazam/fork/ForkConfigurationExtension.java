@@ -13,6 +13,8 @@ import java.util.Collection;
 
 import groovy.lang.Closure;
 
+import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.NONE;
+
 /**
  * Fork extension.
  */
@@ -104,4 +106,9 @@ public class ForkConfigurationExtension {
         poolingStrategyClosure.setDelegate(poolingStrategy);
         poolingStrategyClosure.call();
     }
+
+    /**
+     * Specifies that Fork should run using one of "under integration test" modes
+     */
+    public ForkConfiguration.ForkIntegrationTestRunType forkIntegrationTestRunType = NONE;
 }
