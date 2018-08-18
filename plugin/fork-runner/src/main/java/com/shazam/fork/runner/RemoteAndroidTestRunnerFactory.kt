@@ -62,7 +62,7 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                                 testCaseCommandPattern.matchEntire(command)?.destructured
                                         ?: throw IllegalStateException()
                         listeners.testRunStarted("emulators", 1)
-                        listeners.fireTest("$testClass#$testMethod", 200)
+                        listeners.fireTest("$testClass#$testMethod", 1234)
                         listeners.testRunEnded(1234, emptyMap())
                     }
                     else -> throw IllegalStateException("Unexpected command: $command")

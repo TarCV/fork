@@ -75,7 +75,7 @@ public class PoolLoader {
     private Device createStubDevice(String serial, int api) {
         String manufacturer = "fork";
         String model = "Emu-" + api;
-        StubDevice stubDevice = new StubDevice(serial, manufacturer, model, serial, api, "");
+        StubDevice stubDevice = new StubDevice(serial, manufacturer, model, serial, api, "", 1234);
         return new Device.Builder()
                 .withApiLevel(String.valueOf(api))
                 .withDisplayGeometry(new DisplayGeometry(640))

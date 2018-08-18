@@ -17,16 +17,18 @@ import com.android.sdklib.AndroidVersion
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
+import java.lang.Thread.sleep
 import java.util.concurrent.Future
 import java.util.concurrent.TimeUnit
 
 class StubDevice(
-        val serial: String,
-        val manufacturer: String,
-        val model: String,
+        private val serial: String,
+        private val manufacturer: String,
+        private val model: String,
         private val name: String,
-        val api: Int,
-        val characteristics: String
+        private val api: Int,
+        private val characteristics: String,
+        private val testCommandDelay: Long
 ) : IDevice {
     val deviceLogFile = File("${serial}_adb.log")
 
@@ -48,6 +50,10 @@ class StubDevice(
     override fun executeShellCommand(command: String, receiver: IShellOutputReceiver) {
         synchronized(this) {
             val outputBytes = "<stub> <stub> <stub> <stub> <stub>".toByteArray()
+
+            if (command.contains("am instrument")) {
+                sleep(testCommandDelay)
+            }
 
             FileWriter(deviceLogFile, true).apply {
                 write("${System.currentTimeMillis()}\t$command${System.lineSeparator()}")
