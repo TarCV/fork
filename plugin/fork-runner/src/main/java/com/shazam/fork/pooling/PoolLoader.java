@@ -39,13 +39,13 @@ public class PoolLoader {
 
     public Collection<Pool> loadPools() throws NoDevicesForPoolException, NoPoolLoaderConfiguredException {
         if (configuration.getForkIntegrationTestRunType() == STUB_PARALLEL_TESTRUN) {
-            Device device18 = createStubDevice("fork-5554", 18);
-            Device device27 = createStubDevice("fork-5556", 27);
+            Device device1 = createStubDevice("fork-5554", 25);
+            Device device2 = createStubDevice("fork-5556", 25);
 
             Pool pool = new Pool.Builder()
                     .withName("Stub 2 device pool")
-                    .addDevice(device18)
-                    .addDevice(device27)
+                    .addDevice(device1)
+                    .addDevice(device2)
                     .build();
 
             return Collections.singletonList(pool);

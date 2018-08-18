@@ -49,13 +49,13 @@ class RecordingTestRunListener(device: Device, isLogOnly: Boolean) : ITestRunLis
         writer.append("$deviceSerial testFailed $test,$trace$separator")
     }
 
-    override fun testEnded(test: TestIdentifier?, testMetrics: MutableMap<String, String>?) {
+    override fun testEnded(test: TestIdentifier?, testMetrics: Map<String, String>?) {
         val metricsString = testMetrics
                 ?.entries
                 ?.toList()
                 ?.sortedBy { it.key }
-                ?.joinToString { "${it.key} -> ${it.value}" }
-        writer.append("$deviceSerial testEnded $test,$metricsString$separator")
+                ?.joinToString(";") { "${it.key} -> ${it.value}" }
+        writer.append("$deviceSerial testEnded $test,{$metricsString}$separator")
     }
 
     override fun testIgnored(test: TestIdentifier?) {
@@ -66,8 +66,13 @@ class RecordingTestRunListener(device: Device, isLogOnly: Boolean) : ITestRunLis
         writer.append("$deviceSerial testRunFailed $errorMessage$separator")
     }
 
-    override fun testRunEnded(elapsedTime: Long, runMetrics: MutableMap<String, String>?) {
-        writer.append("$deviceSerial testRunEnded $elapsedTime,$runMetrics$separator")
+    override fun testRunEnded(elapsedTime: Long, runMetrics: Map<String, String>?) {
+        val metricsString = runMetrics
+                ?.entries
+                ?.toList()
+                ?.sortedBy { it.key }
+                ?.joinToString(";") { "${it.key} -> ${it.value}" }
+        writer.append("$deviceSerial testRunEnded $elapsedTime,{$metricsString}$separator")
         writer.close()
     }
 }

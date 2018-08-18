@@ -28,16 +28,43 @@ class StubDevice(
         val api: Int,
         val characteristics: String
 ) : IDevice {
+    val deviceLogFile = File("${serial}_adb.log")
 
-    override fun startScreenRecorder(remoteFilePath: String?, options: ScreenRecorderOptions?, receiver: IShellOutputReceiver?) {
+    override fun startScreenRecorder(remoteFilePath: String, options: ScreenRecorderOptions, receiver: IShellOutputReceiver) {
+        synchronized(this) {
+            val optionsStr = "{dimen=${options.width}x${options.height}" +
+                    ", Mbps=${options.bitrateMbps}" +
+                    ", limit=${options.timeLimit} ${options.timeLimitUnits}}"
+            FileWriter(deviceLogFile, true).apply {
+                write("${System.currentTimeMillis()}\t[START SCREEN RECORDER]" +
+                        " $remoteFilePath,$optionsStr${System.lineSeparator()}")
+                close()
+            }
+        }
     }
 
     override fun getName(): String = name
 
     override fun executeShellCommand(command: String, receiver: IShellOutputReceiver) {
-        val outputBytes = "Stub shell command output".toByteArray()
-        receiver.addOutput(outputBytes, 0, outputBytes.size)
-        receiver.flush()
+        synchronized(this) {
+            val outputBytes = "<stub> <stub> <stub> <stub> <stub>".toByteArray()
+
+            FileWriter(deviceLogFile, true).apply {
+                write("${System.currentTimeMillis()}\t$command${System.lineSeparator()}")
+                close()
+            }
+
+            receiver.addOutput(outputBytes, 0, outputBytes.size)
+            receiver.flush()
+        }
+    }
+
+    override fun executeShellCommand(command: String, receiver: IShellOutputReceiver, maxTimeToOutputResponse: Int) {
+        executeShellCommand(command, receiver)
+    }
+
+    override fun executeShellCommand(command: String, receiver: IShellOutputReceiver, maxTimeToOutputResponse: Long, maxTimeUnits: TimeUnit?) {
+        executeShellCommand(command, receiver)
     }
 
     override fun getProperty(name: String): String {
@@ -52,14 +79,45 @@ class StubDevice(
 
     @Throws(IOException::class)
     override fun pullFile(remote: String, local: String) {
+        synchronized(this) {
+            FileWriter(deviceLogFile, true).apply {
+                write("${System.currentTimeMillis()}\t[PULL FILE] $remote,$local" +
+                        System.lineSeparator())
+                close()
+            }
+        }
+
         val writer = FileWriter(File(local))
         writer.flush()
         writer.close()
     }
 
-    override fun uninstallPackage(packageName: String): String? = null
+    override fun uninstallPackage(packageName: String): String? {
+        synchronized(this) {
+            FileWriter(deviceLogFile, true).apply {
+                write("${System.currentTimeMillis()}\t[UNINSTALL PACKAGE] $packageName" +
+                        System.lineSeparator())
+                close()
+            }
+        }
 
-    override fun installPackage(packageFilePath: String, reinstall: Boolean, vararg extraArgs: String) {}
+        return null
+    }
+
+    override fun installPackage(
+            packageFilePath: String,
+            reinstall: Boolean,
+            vararg extraArgs: String
+    ) {
+        synchronized(this) {
+            FileWriter(deviceLogFile, true).apply {
+                write("${System.currentTimeMillis()}\t[INSTALL PACKAGE] $packageFilePath" +
+                        " reinstall=$reinstall extraArgs={${extraArgs.joinToString(" ")}}" +
+                        System.lineSeparator())
+                close()
+            }
+        }
+    }
 
     override fun supportsFeature(feature: IDevice.Feature): Boolean {
         return when(feature) {
@@ -75,6 +133,8 @@ class StubDevice(
     override fun getVersion(): AndroidVersion = AndroidVersion(api, null)
 
     override fun getSerialNumber(): String = serial
+
+    override fun isOnline(): Boolean = true
 
 
     // Methods below this line are not used Fork and therefore doesn't need to be stubbed
@@ -104,10 +164,6 @@ class StubDevice(
     }
 
     override fun getClientName(pid: Int): String {
-        TODO("not implemented")
-    }
-
-    override fun isOnline(): Boolean {
         TODO("not implemented")
     }
 
@@ -180,14 +236,6 @@ class StubDevice(
     }
 
     override fun getBattery(freshnessTime: Long, timeUnit: TimeUnit?): Future<Int> {
-        TODO("not implemented")
-    }
-
-    override fun executeShellCommand(command: String?, receiver: IShellOutputReceiver?, maxTimeToOutputResponse: Int) {
-        TODO("not implemented")
-    }
-
-    override fun executeShellCommand(command: String?, receiver: IShellOutputReceiver?, maxTimeToOutputResponse: Long, maxTimeUnits: TimeUnit?) {
         TODO("not implemented")
     }
 
