@@ -35,7 +35,8 @@ public class PoolTestRunner implements Runnable {
     private final DeviceTestRunnerFactory deviceTestRunnerFactory;
     private final ProgressReporter progressReporter;
 
-    public PoolTestRunner(DeviceTestRunnerFactory deviceTestRunnerFactory, Pool pool,
+    public PoolTestRunner(DeviceTestRunnerFactory deviceTestRunnerFactory,
+                          Pool pool,
                           Queue<TestCaseEvent> testCases,
                           CountDownLatch poolCountDownLatch,
                           ProgressReporter progressReporter) {

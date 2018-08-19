@@ -50,7 +50,8 @@ public class TestRunListenersFactory {
                                                       Device device,
                                                       Pool pool,
                                                       ProgressReporter progressReporter,
-                                                      Queue<TestCaseEvent> testCaseEventQueue, ForkConfiguration.ForkIntegrationTestRunType forkIntegrationTestRunType) {
+                                                      Queue<TestCaseEvent> testCaseEventQueue,
+                                                      ForkConfiguration.ForkIntegrationTestRunType forkIntegrationTestRunType) {
         final List<ITestRunListener> normalListeners = asList(
                 new ProgressTestRunListener(pool, progressReporter),
                 getForkXmlTestRunListener(fileManager, configuration.getOutput(), pool, device, testCase, progressReporter),
