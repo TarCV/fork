@@ -24,24 +24,94 @@ class FunctionalPostConditionTest {
             acc
         }
 
-        assert(simplifiedResults.size == 7) { "All tests should be executed" }
+        assert(simplifiedResults.size == 1+3+3+11) { "All tests should be executed" }
     }
 
     @Test
     fun testNumberedParameterizedTestExecutedCorrectly() {
-        doAssertionsForParameterizedTests("""$packageForRegex\.ParameterizedTest#test\[\d+]""".toRegex())
+        doAssertionsForParameterizedTests(
+                """$packageForRegex\.ParameterizedTest#test\[\d+]""".toRegex(), 3)
     }
 
     @Test
     fun testNamedParameterizedTestExecutedCorrectly() {
-        doAssertionsForParameterizedTests("""$packageForRegex\.ParameterizedNamedTest#test\[\s*param = .+]""".toRegex())
+        doAssertionsForParameterizedTests(
+                """$packageForRegex\.ParameterizedNamedTest#test\[\s*param = .+]""".toRegex(), 3)
+    }
+
+    @Test
+    fun testDangerousNamesTestExecutedCorrectly() {
+        doAssertionsForParameterizedTests(
+                """$packageForRegex\.DangerousNamesTest#test\[\s*param = .+]""".toRegex(), 11)
     }
 
     @Test
     fun testVideoRecorderIsCalledWithGoodFilename() {
-        val shellBinary = "/bin/sh"
-        Assume.assumeTrue("Executing on *NIX system", File(shellBinary).exists())
+        Assume.assumeTrue("Executing on a *NIX system", File(shellBinary).exists())
+        Assume.assumeTrue("Running tests with stubbed ADB",
+                System.getenv("CI_STUBBED")?.toBoolean() ?: false)
 
+        readAdbLogLines { lines ->
+            lines.filter { it.contains("[START SCREEN RECORDER] ") }
+                    .map {
+                        """.+\[START SCREEN RECORDER] (.+?),\{.+"""
+                                .toRegex()
+                                .matchEntire(it)
+                                ?.groupValues
+                                ?.get(1)
+                                ?: throw AssertionError("Unexpected screenrecord line ${it}")
+                    }
+                    .forEach { actualPath ->
+                        this@FunctionalPostConditionTest.assertNotMangledByShell(actualPath)
+                    }
+        }
+    }
+
+    @Test
+    fun testSuiteIsExecutedForLogWithGoodArgument() {
+        Assume.assumeTrue("Executing on a *NIX system", File(shellBinary).exists())
+        Assume.assumeTrue("Running tests with stubbed ADB",
+                System.getenv("CI_STUBBED")?.toBoolean() ?: false)
+
+        readAdbLogLines { lines ->
+            lines.filter { it.contains("[START SCREEN RECORDER] ") }
+                    .map {
+                        """.+\[START SCREEN RECORDER] (.+?),\{.+"""
+                                .toRegex()
+                                .matchEntire(it)
+                                ?.groupValues
+                                ?.get(1)
+                                ?: throw AssertionError("Unexpected screenrecord line ${it}")
+                    }
+                    .forEach { actualPath ->
+                        this@FunctionalPostConditionTest.assertNotMangledByShell(actualPath)
+                    }
+        }
+    }
+
+    @Test
+    fun testCasesAreExecutedWithGoodArgument() {
+        Assume.assumeTrue("Executing on a *NIX system", File(shellBinary).exists())
+        Assume.assumeTrue("Running tests with stubbed ADB",
+                System.getenv("CI_STUBBED")?.toBoolean() ?: false)
+
+        readAdbLogLines { lines ->
+            lines.filter { it.contains("[START SCREEN RECORDER] ") }
+                    .map {
+                        """.+\[START SCREEN RECORDER] (.+?),\{.+"""
+                                .toRegex()
+                                .matchEntire(it)
+                                ?.groupValues
+                                ?.get(1)
+                                ?: throw AssertionError("Unexpected screenrecord line ${it}")
+                    }
+                    .forEach { actualPath ->
+                        this@FunctionalPostConditionTest.assertNotMangledByShell(actualPath)
+                    }
+        }
+    }
+
+    private fun readAdbLogLines(block: (List<String>) -> Unit) {
         getAdbLogFiles(".").let {
             if (it.isEmpty()) {
                 getAdbLogFiles("..")
@@ -57,29 +127,22 @@ class FunctionalPostConditionTest {
                 .forEach { file ->
                     Files
                             .readAllLines(file.toPath())
-                            .filter { it.contains("[START SCREEN RECORDER] ") }
-                            .map {
-                                """.+\[START SCREEN RECORDER] (.+?),\{.+"""
-                                        .toRegex()
-                                        .matchEntire(it)
-                                        ?.groupValues
-                                        ?.get(1)
-                                        ?: throw AssertionError("Unexpected screenrecord line ${it}")
-                            }
-                            .forEach { actualPath ->
-                                val echoCmd = CommandLine(shellBinary)
-                                        .addArgument("-c")
-                                        .addArgument("echo \$1", false)
-                                        .addArgument("--")
-                                        .addArgument(actualPath, false)
-                                val receivedPath = executeCommandWithOutput(echoCmd).trim()
-
-                                assert(actualPath.length - receivedPath.length <= 5) {
-                                    "Path passed to screenrecord command should not be" +
-                                            " mangled by the shell, test 2 (got $receivedPath)"
-                                }
-                            }
+                            .let(block)
                 }
+    }
+
+    private fun assertNotMangledByShell(str: String) {
+        val echoCmd = CommandLine(shellBinary)
+                .addArgument("-c")
+                .addArgument("echo \$1", false)
+                .addArgument("--")
+                .addArgument(str, false)
+        val receivedPath = executeCommandWithOutput(echoCmd).trim()
+
+        assert(str.length - receivedPath.length <= 5) {
+            "Path passed to screenrecord command should not be" +
+                    " mangled by the shell, test 2 (got $receivedPath)"
+        }
     }
 
     private fun getAdbLogFiles(dirPath: String): Array<out File> {
@@ -93,6 +156,8 @@ class FunctionalPostConditionTest {
 
 }
 
+private const val shellBinary = "/bin/sh"
+
 private fun executeCommandWithOutput(cmd: CommandLine): String {
     val outputStream = ByteArrayOutputStream()
     val pumper = PumpStreamHandler(outputStream)
@@ -104,7 +169,7 @@ private fun executeCommandWithOutput(cmd: CommandLine): String {
     return outputStream.toString()
 }
 
-private fun doAssertionsForParameterizedTests(pattern: Regex) {
+private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int) {
     val simplifiedResults = getSimplifiedResults()
 
     val testsPerDevice = simplifiedResults
@@ -121,8 +186,8 @@ private fun doAssertionsForParameterizedTests(pattern: Regex) {
     assert(testsPerDevice.size == 2) { "Variants should be executed on exactly 2 devices (got ${testsPerDevice.size})" }
     assert(testsPerDevice[0].value.get() > 0) { "At least one parameterized test should be executed on ${testsPerDevice[0].key} device" }
     assert(testsPerDevice[1].value.get() > 0) { "At least one parameterized test should be executed on ${testsPerDevice[1].key} device" }
-    assert(testsPerDevice[0].value.get() + testsPerDevice[1].value.get() == 3) {
-        "Exactly 3 parameterized tests should be executed" +
+    assert(testsPerDevice[0].value.get() + testsPerDevice[1].value.get() == expectedCount) {
+        "Exactly $expectedCount parameterized tests should be executed" +
                 " (device1=${testsPerDevice[0].value.get()}, device2=${testsPerDevice[1].value.get()})"
     }
 }

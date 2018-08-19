@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Shazam Entertainment Limited
+ * Derivative work is copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -37,7 +38,6 @@ dependencies {
             'org.simpleframework:simple-xml:2.7.1',
             'com.madgag:animated-gif-lib:1.2',
     )
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.4'
 
     compile('org.lesscss:lesscss:1.7.0.1.1') {
         exclude module: 'slf4j-simple'

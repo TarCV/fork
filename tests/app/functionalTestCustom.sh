@@ -4,8 +4,7 @@ set -ex
 
 cd `dirname "$0"`
 
-GRADLE_OPTS="-Dorg.gradle.logging.level=quiet -Dorg.gradle.console=plain"
-export GRADLE_OPTS
+export GRADLE_OPTS="-Dorg.gradle.logging.level=quiet -Dorg.gradle.console=plain"
 rm *.log || true
 ./gradlew app:compileDebugAndroidTestSources
 ./gradlew --info :app:fork

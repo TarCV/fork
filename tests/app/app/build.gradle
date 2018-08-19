@@ -49,10 +49,12 @@ fork {
     poolingStrategy {
         manual {
             groupings {
-                emulators = ["fork-5554", "fork-5556"]
+                emulators = [System.getenv("DEVICE1"), System.getenv("DEVICE2")]
             }
         }
     }
 
-    forkIntegrationTestRunType = com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN
+    forkIntegrationTestRunType = Boolean.valueOf(System.getenv("CI_STUBBED")) ?
+            com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN
+            : com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS
 }

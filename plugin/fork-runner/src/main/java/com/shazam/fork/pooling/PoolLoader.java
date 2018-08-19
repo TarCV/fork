@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN;
+import static com.shazam.fork.runner.TestAndroidTestRunnerFactory.functionalTestTestcaseDuration;
 import static java.lang.String.format;
 
 public class PoolLoader {
@@ -75,7 +76,8 @@ public class PoolLoader {
     private Device createStubDevice(String serial, int api) {
         String manufacturer = "fork";
         String model = "Emu-" + api;
-        StubDevice stubDevice = new StubDevice(serial, manufacturer, model, serial, api, "", 1234);
+        StubDevice stubDevice = new StubDevice(serial, manufacturer, model, serial, api, "",
+                functionalTestTestcaseDuration);
         return new Device.Builder()
                 .withApiLevel(String.valueOf(api))
                 .withDisplayGeometry(new DisplayGeometry(640))

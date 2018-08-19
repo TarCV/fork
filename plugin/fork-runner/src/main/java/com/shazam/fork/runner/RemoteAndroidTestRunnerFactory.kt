@@ -14,9 +14,12 @@ import com.android.ddmlib.NullOutputReceiver
 import com.android.ddmlib.testrunner.ITestRunListener
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner
 import com.android.ddmlib.testrunner.TestIdentifier
+import com.shazam.fork.utils.DdmsUtils
+import com.shazam.fork.utils.DdmsUtils.unescapeInstrumentationArg
 
 interface IRemoteAndroidTestRunnerFactory {
     fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner
+    fun properlyAddInstrumentationArg(runner: RemoteAndroidTestRunner, name: String, value: String)
 }
 
 class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
@@ -25,6 +28,10 @@ class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 testPackage,
                 testRunner,
                 device)
+    }
+
+    override fun properlyAddInstrumentationArg(runner: RemoteAndroidTestRunner, name: String, value: String) {
+        DdmsUtils.properlyAddInstrumentationArg(runner, name, value)
     }
 }
 
@@ -47,28 +54,33 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 val command = amInstrumentCommand
                 when (command) {
                     in logOnlyCommandPattern -> {
-                        listeners.testRunStarted("emulators", 7)
-                        listeners.fireTest("com.github.tarcv.test.NormalTest#test")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedNamedTest#test[param = 1]")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedNamedTest#test[param = 2]")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedNamedTest#test[param = 3]")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedTest#test[0]")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedTest#test[1]")
-                        listeners.fireTest("com.github.tarcv.test.ParameterizedTest#test[2]")
-                        listeners.testRunEnded(1234, emptyMap())
+                        listeners.testRunStarted("emulators", testCases.size)
+                        testCases.forEach {
+                            listeners.fireTest(it)
+                        }
+                        listeners.testRunEnded(100, emptyMap())
                     }
                     in testCaseCommandPattern -> {
                         val (testMethod, testClass) =
-                                testCaseCommandPattern.matchEntire(command)?.destructured
+                                testCaseCommandPattern.matchEntire(command)
+                                        ?.groupValues
+                                        ?.drop(1) // group 0 is the entire match
+                                        ?.map { unescapeInstrumentationArg(it) }
                                         ?: throw IllegalStateException()
                         listeners.testRunStarted("emulators", 1)
-                        listeners.fireTest("$testClass#$testMethod", 1234)
-                        listeners.testRunEnded(1234, emptyMap())
+                        listeners.fireTest("$testClass#$testMethod", functionalTestTestcaseDuration)
+                        listeners.testRunEnded(functionalTestTestcaseDuration, emptyMap())
                     }
                     else -> throw IllegalStateException("Unexpected command: $command")
                 }
             }
         }
+    }
+
+    override fun properlyAddInstrumentationArg(runner: RemoteAndroidTestRunner, name: String, value: String) {
+        // proper escaping really complicates RemoteAndroidTestRunner#stubbedRun implementation
+        //  so skip it here
+        runner.addInstrumentationArg(name, value)
     }
 
     private fun ITestRunListener.fireTest(testCase: String, delayMillis: Long = 0) {
@@ -81,6 +93,8 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     }
 
     companion object {
+        const val functionalTestTestcaseDuration = 2345L
+
         private const val expectedTestPackage = "com.github.tarcv.forktestapp.test"
         private const val expectedTestRunner = "android.support.test.runner.AndroidJUnitRunner"
         val logOnlyCommandPattern =
@@ -92,14 +106,33 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                         .toRegex()
         val testCaseCommandPattern =
                 ("am\\s+instrument -w -r" +
-                        " -e filterMethod '()'" +
+                        " -e filterMethod ()" +
                         " -e filter com.shazam.fork.ondevice.ClassMethodFilter" +
-                        " -e filterClass '()'" +
+                        " -e filterClass ()" +
                         """\s+$expectedTestPackage\/$expectedTestRunner""")
                         .replace(".", "\\.")
                         .replace(" -", "\\s+-")
-                        .replace("()", "(.+)")
+                        .replace("()", "(.+?)")
                         .toRegex()
+        private val testCases = listOf("""com.github.tarcv.test.DangerousNamesTest#test[param = """ + '$' + """THIS_IS_NOT_A_VAR]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param =        1       ]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = #######]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = !!!!!!!]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = ''''''']""",
+                "com.github.tarcv.test.DangerousNamesTest#test[param = \"\"\"\"\"\"\"\"]",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = ()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = * *.* * *.* * *.* * *.* * *.* * *.* * *.* * *.* *]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = . .. . .. . .. . .. . .. . .. . .. . .. . .. . ..]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = |&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%]""",
+                """com.github.tarcv.test.DangerousNamesTest#test[param = ; function {}; while {}; for {}; do {}; done {}; exit]""",
+                """com.github.tarcv.test.NormalTest#test""",
+                """com.github.tarcv.test.ParameterizedNamedTest#test[param = 1]""",
+                """com.github.tarcv.test.ParameterizedNamedTest#test[param = 2]""",
+                """com.github.tarcv.test.ParameterizedNamedTest#test[param = 3]""",
+                """com.github.tarcv.test.ParameterizedTest#test[0]""",
+                """com.github.tarcv.test.ParameterizedTest#test[1]""",
+                """com.github.tarcv.test.ParameterizedTest#test[2]"""
+        )
     }
 }
 

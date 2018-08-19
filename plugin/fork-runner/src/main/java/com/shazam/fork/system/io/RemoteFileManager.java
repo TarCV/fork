@@ -19,11 +19,12 @@ import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.TestIdentifier;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+
+import static com.shazam.fork.utils.DdmsUtils.escapeArgumentForCommandLine;
 
 
 public class RemoteFileManager {
@@ -65,7 +66,7 @@ public class RemoteFileManager {
     }
 
     public static String remoteVideoForTest(TestIdentifier test) {
-        return StringEscapeUtils.escapeXSI(remoteFileForTest(videoFileName(test)));
+        return escapeArgumentForCommandLine(remoteFileForTest(videoFileName(test)));
     }
 
     private static String remoteFileForTest(String filename) {
