@@ -37,6 +37,7 @@ dependencies {
             'org.simpleframework:simple-xml:2.7.1',
             'com.madgag:animated-gif-lib:1.2',
     )
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.4'
 
     compile('org.lesscss:lesscss:1.7.0.1.1') {
         exclude module: 'slf4j-simple'

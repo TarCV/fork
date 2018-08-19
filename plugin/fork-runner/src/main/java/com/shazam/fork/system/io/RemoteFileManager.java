@@ -16,12 +16,15 @@ import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.NullOutputReceiver;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
-import com.android.ddmlib.SyncException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.TestIdentifier;
-import java.io.IOException;
+
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+
 
 public class RemoteFileManager {
 
@@ -62,7 +65,7 @@ public class RemoteFileManager {
     }
 
     public static String remoteVideoForTest(TestIdentifier test) {
-        return remoteFileForTest(videoFileName(test));
+        return StringEscapeUtils.escapeXSI(remoteFileForTest(videoFileName(test)));
     }
 
     private static String remoteFileForTest(String filename) {
@@ -70,6 +73,10 @@ public class RemoteFileManager {
     }
 
     private static String videoFileName(TestIdentifier test) {
-        return String.format("%s-%s.mp4", test.getClassName(), test.getTestName());
+        final String className = test.getClassName();
+        if (className.contains("-")) {
+            throw new IllegalArgumentException("Test class names must not contain '-' character");
+        }
+        return String.format("%s-%s.mp4", className, test.getTestName());
     }
 }
