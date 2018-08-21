@@ -34,4 +34,4 @@ cache:
 
 script:
   - cd plugin; ./gradlew check
-  - tests/app/functionalTestStubbed.sh
+  - $TRAVIS_BUILD_DIR/tests/app/functionalTestStubbed.sh
