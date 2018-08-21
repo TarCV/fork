@@ -12,32 +12,8 @@ before_install:
   - echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > "$ANDROID_HOME/licenses/android-sdk-license"
   #- touch ~/.android/repositories.cfg
   - sdkmanager --list || true
-  - sdkmanager --uninstall "system-images;android-15;default;armeabi-v7a"
-  - sdkmanager --uninstall "system-images;android-16;default;armeabi-v7a"
-  - sdkmanager --uninstall "system-images;android-17;default;armeabi-v7a"
-  - sdkmanager --uninstall "system-images;android-18;default;armeabi-v7a"
-  - sdkmanager --uninstall "system-images;android-19;default;armeabi-v7a"
-  - sdkmanager --uninstall "system-images;android-21;default;armeabi-v7a"
-  - sdkmanager --uninstall "extras;google;google_play_services"
-  - sdkmanager --uninstall "extras;android;support"
-  - sdkmanager --uninstall "platforms;android-10"
-  - sdkmanager --uninstall "platforms;android-15"
-  - sdkmanager --uninstall "platforms;android-16"
-  - sdkmanager --uninstall "platforms;android-17"
-  - sdkmanager --uninstall "platforms;android-18"
-  - sdkmanager --uninstall "platforms;android-19"
-  - sdkmanager --uninstall "platforms;android-20"
-  - sdkmanager --uninstall "platforms;android-21"
-  - sdkmanager --uninstall "build-tools;21.1.2"
-  - sdkmanager --list || true
-  #- sdkmanager --update >/dev/null
   - sdkmanager tools >/dev/null
-  #- sdkmanager emulator >/dev/null
   - sdkmanager "platforms;android-27" >/dev/null
-  - sdkmanager "platforms;android-24" >/dev/null
-  - sdkmanager "platforms;android-18" >/dev/null
-  - sdkmanager "system-images;android-24;google_apis;armeabi-v7a" >/dev/null
-  - sdkmanager "system-images;android-18;google_apis;armeabi-v7a" >/dev/null
 
 jdk:
   - oraclejdk8
@@ -57,4 +33,5 @@ cache:
     - $HOME/.android/build-cache
 
 script:
-  - tests/app/test.sh
+  - cd plugin; ./gradlew check
+  - tests/app/functionalTestStubbed.sh
