@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Shazam Entertainment Limited
+ * Derivative work is Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -10,17 +11,16 @@
 
 package com.shazam.fork.injector.suite;
 
+import com.shazam.fork.suite.JUnitTestSuiteLoader;
 import com.shazam.fork.suite.TestSuiteLoader;
 
-import static com.shazam.fork.injector.ConfigurationInjector.configuration;
-import static com.shazam.fork.injector.io.DexFileExtractorInjector.dexFileExtractor;
-import static com.shazam.fork.injector.suite.TestClassMatcherInjector.testClassMatcher;
+import static com.shazam.fork.injector.pooling.PoolLoaderInjector.poolLoader;
 
 public class TestSuiteLoaderInjector {
 
     private TestSuiteLoaderInjector() {}
 
     public static TestSuiteLoader testSuiteLoader() {
-        return new TestSuiteLoader(configuration().getInstrumentationApk(), dexFileExtractor(), testClassMatcher());
+        return new JUnitTestSuiteLoader(poolLoader());
     }
 }
