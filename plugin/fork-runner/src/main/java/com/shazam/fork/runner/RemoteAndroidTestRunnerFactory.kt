@@ -131,7 +131,11 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 """com.github.tarcv.test.ParameterizedNamedTest#test[param = 3]""",
                 """com.github.tarcv.test.ParameterizedTest#test[0]""",
                 """com.github.tarcv.test.ParameterizedTest#test[1]""",
-                """com.github.tarcv.test.ParameterizedTest#test[2]"""
+                """com.github.tarcv.test.ParameterizedTest#test[2]""",
+                """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[0]""",
+                """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[1]""",
+                """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[2]""",
+                """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[3]"""
         )
     }
 }
