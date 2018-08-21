@@ -1,2 +1,2 @@
-include ':app', ':tests'
+include ':app'
 includeBuild '../../plugin'
