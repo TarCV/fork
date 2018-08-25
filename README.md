@@ -161,8 +161,8 @@ characteristic         | Characteristic             | Possible values: "sw"\|"ap
 groups                 | Map&lt;String, Integer&gt; | map the name of a pool to their lowest dimension for a characteristic
 
 ## Runtime Permissions
-By default Fork auto-grants all runtime permissions on Android Marshmallow +. ~~It is possible anyway to selectively revoke one or more permissions per single test case.~~(Not supported yet in TarCV/fork)
-~~To do so, you have to add an annotation called `RevokePermission`. Here is an example:
+By default Fork auto-grants all runtime permissions on Android Marshmallow +. ~~It is possible anyway to selectively revoke one or more permissions per single test case.~~ (Not supported yet in TarCV/fork)
+~~To do so, you have to add an annotation called `RevokePermission`. Here is an example:~~
 ```java
   @Test
   @RevokePermission({Manifest.permission.RECORD_AUDIO,
@@ -173,7 +173,7 @@ By default Fork auto-grants all runtime permissions on Android Marshmallow +. ~~
 ```
 
 ~~Remember to add the fork client-side library to your project to have access to the annotation.
-To do so, in your app's dependencies add:
+To do so, in your app's dependencies add:~~
 ```
     androidTestImplementation "com.shazam.fork:fork-client:3.3.0"
 ```
@@ -184,13 +184,13 @@ This feature will impact only Marshmallow and subsequent devices.
 ## Arbitrary metadata
 ~~Using Fork you can set metadata on tests and get them back in its JUnit xml reports. The metadata are added as additional `property` tags on the suite level of the report, as each test produces its own report.~~(Not supported yet in TarCV/fork)
 
-~~```java
+```java
 @Test
 @TestProperties(keys = {"k1", "k2"}, values = {"v1", "v2"})
 public void testWithProperties() {
     // Test normally here
 }
-```~~
+```
 
 ~~Note that Fork will stop adding pairs after it encounters an unpaired key or value, so make sure you have the same number of keys and values.~~
 
