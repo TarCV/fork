@@ -415,7 +415,8 @@ The system could then provide a systrace & GPU profiling reports for the duratio
 
 # License
 
-    Copyright 2016 Shazam Entertainment Limited.
+    Code copied from Fork by Shazam is Copyright 2016 Shazam Entertainment Limited.
+    New code is Copyright 2018 TarCV
 
     Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 
