@@ -5,18 +5,20 @@ Goals of this fork
  - [x] Use JUnit 4 facilities to get list of test methods to execute
  (possibly with childs created by runners such as Parameterized)
 
- - [ ] Support all the runners provided out of box in  ASTL
+ - [x] Support all the runners provided out of box in ASTL (in theory they should be supported. Although there is no integration tests for them, so please file issues in case they are not)
 
  - [ ] Support cases where some testcases are disabled on some
-  devices via annotations
+  devices via annotations or filters
 
- - [ ] Support custom filters
+ - [ ] Support passing instrumentation arguments (including custom filters)
 
  - [x] Clean tested app data before executing each testcase
 
  - [ ] Option to clean/reinstall tested app before testcase execution
 
  - [ ] Restore support of original Fork annotations
+ 
+ - [ ] Make Flakiness reports customizable
 
 ***Original README content below***
 ===================================
@@ -159,8 +161,8 @@ characteristic         | Characteristic             | Possible values: "sw"\|"ap
 groups                 | Map&lt;String, Integer&gt; | map the name of a pool to their lowest dimension for a characteristic
 
 ## Runtime Permissions
-By default Fork auto-grants all runtime permissions on Android Marshmallow +. It is possible anyway to selectively revoke one or more permissions per single test case.
-To do so, you have to add an annotation called `RevokePermission`. Here is an example:
+By default Fork auto-grants all runtime permissions on Android Marshmallow +. ~~It is possible anyway to selectively revoke one or more permissions per single test case.~~(Not supported yet in TarCV/fork)
+~~To do so, you have to add an annotation called `RevokePermission`. Here is an example:
 ```java
   @Test
   @RevokePermission({Manifest.permission.RECORD_AUDIO,
@@ -170,7 +172,7 @@ To do so, you have to add an annotation called `RevokePermission`. Here is an ex
   }
 ```
 
-Remember to add the fork client-side library to your project to have access to the annotation.
+~~Remember to add the fork client-side library to your project to have access to the annotation.
 To do so, in your app's dependencies add:
 ```
     androidTestImplementation "com.shazam.fork:fork-client:3.3.0"
@@ -180,16 +182,17 @@ After every test case, all the runtime permissions will be automatically re-gran
 This feature will impact only Marshmallow and subsequent devices.
 
 ## Arbitrary metadata
-Using Fork you can set metadata on tests and get them back in its JUnit xml reports. The metadata are added as additional `property` tags on the suite level of the report, as each test produces its own report.
+~~Using Fork you can set metadata on tests and get them back in its JUnit xml reports. The metadata are added as additional `property` tags on the suite level of the report, as each test produces its own report.~~(Not supported yet in TarCV/fork)
 
-```java
+~~```java
 @Test
 @TestProperties(keys = {"k1", "k2"}, values = {"v1", "v2"})
 public void testWithProperties() {
     // Test normally here
 }
-```
-Note that Fork will stop adding pairs after it encounters an unpaired key or value, so make sure you have the same number of keys and values. 
+```~~
+
+~~Note that Fork will stop adding pairs after it encounters an unpaired key or value, so make sure you have the same number of keys and values.~~
 
 ## Examples
 
