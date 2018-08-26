@@ -16,6 +16,7 @@ import com.android.ddmlib.testrunner.RemoteAndroidTestRunner
 import com.android.ddmlib.testrunner.TestIdentifier
 import com.shazam.fork.utils.DdmsUtils
 import com.shazam.fork.utils.DdmsUtils.unescapeInstrumentationArg
+import java.util.*
 
 interface IRemoteAndroidTestRunnerFactory {
     fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner
@@ -36,7 +37,15 @@ class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
 }
 
 class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
+    private val devices = Collections.synchronizedMap(HashMap<IDevice, Int>()) // to identify first/second device
+
     override fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner {
+        synchronized(devices) {
+            devices.computeIfAbsent(device) {
+                devices.size
+            }
+        }
+
         return object : RemoteAndroidTestRunner(
                 testPackage,
                 testRunner,
@@ -55,12 +64,24 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 when (command) {
                     in logOnlyCommandPattern -> {
                         listeners.testRunStarted("emulators", testCases.size)
-                        testCases.forEach {
-                            listeners.fireTest(it)
-                        }
+                        testCases
+                                .map {
+                                    if (it.contains("DeviceNOnly")) {
+                                        val deviceIndex = devices[device] as Int
+                                        it.replace(
+                                                "DeviceNOnly",
+                                                "Device${1 + deviceIndex}Only")
+                                    } else {
+                                        it
+                                    }
+                                }
+                                .forEach {
+                                    listeners.fireTest(it)
+                                }
                         listeners.testRunEnded(100, emptyMap())
                     }
                     in testCaseCommandPattern -> {
+                        // TODO: assert that the current testcase is in the testcases list
                         val (testMethod, testClass) =
                                 testCaseCommandPattern.matchEntire(command)
                                         ?.groupValues
@@ -126,6 +147,9 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 """com.github.tarcv.test.DangerousNamesTest#test[param = |&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%|&;<>()${'$'}`?[]#~=%]""",
                 """com.github.tarcv.test.DangerousNamesTest#test[param = ; function {}; while {}; for {}; do {}; done {}; exit]""",
                 """com.github.tarcv.test.NormalTest#test""",
+                """com.github.tarcv.test.DeviceNOnlyTest#test[param = 1]""",
+                """com.github.tarcv.test.DeviceNOnlyTest#test[param = 2]""",
+                """com.github.tarcv.test.DeviceNOnlyTest#test[param = 3]""",
                 """com.github.tarcv.test.ParameterizedNamedTest#test[param = 1]""",
                 """com.github.tarcv.test.ParameterizedNamedTest#test[param = 2]""",
                 """com.github.tarcv.test.ParameterizedNamedTest#test[param = 3]""",

@@ -20,11 +20,18 @@ class FunctionalPostConditionTest {
         val simplifiedResults = getSimplifiedResults()
 
         simplifiedResults.fold(HashSet<String>()) { acc, result ->
-            assert(acc.add(result.first)) { "All tests should be executed only once (${result.first} was executed more times)" }
+            assert(acc.add(result.testCase)) { "All tests should be executed only once (${result.testCase} was executed more times)" }
             acc
         }
 
-        assert(simplifiedResults.size == 1+3+3+4+11) { "All tests should be executed" }
+        assert(simplifiedResults.size ==
+                1 + // NormalTest
+                3 + // ParameterizedTest
+                3 + // ParameterizedNamedTest
+                4 + // ResetPrefsTest
+                11 + // DangerousNamesTest (not stubbed tests are not supported yet)
+                3 * 2 // DeviceNOnlyTest
+        ) { "All tests should be executed" }
     }
 
     @Test
@@ -43,6 +50,57 @@ class FunctionalPostConditionTest {
     fun testDangerousNamesTestExecutedCorrectly() {
         doAssertionsForParameterizedTests(
                 """$packageForRegex\.DangerousNamesTest#test\[\s*param = .+]""".toRegex(), 11)
+    }
+
+    @Test
+    fun testDeviceNOnlyTestExecutedCorrectly() {
+        doAssertionsForParameterizedTests(
+                """$packageForRegex\.Device1OnlyTestExecutedCorrectly#test\[\s*param = .+]""".toRegex(), 3)
+        doAssertionsForParameterizedTests(
+                """$packageForRegex\.Device2OnlyTestExecutedCorrectly#test\[\s*param = .+]""".toRegex(), 3)
+    }
+
+    @Test
+    fun testDeviceNOnlyTestExecutedOnlyOneExpectedDevice() {
+        val simplifiedResults = getSimplifiedResults()
+        val pattern = """$packageForRegex\.Device\dOnlyTest#test\[param = \d]""".toRegex()
+
+        class ClassToSerial(
+                val testClass: String,
+                val deviceSerial: String
+        )
+
+        val classPerDevice = simplifiedResults
+                .filter { pattern.matches(it.testCase) }
+                .map {
+                    val testClass = it.testCase.substring(0, it.testCase.indexOf("#"))
+                    ClassToSerial(testClass, it.deviceSerial)
+                }
+                .fold(HashMap<String, String>()) { acc, test ->
+                    val testClassForSerial = acc[test.deviceSerial]
+                    if (testClassForSerial == null) {
+                        acc[test.deviceSerial] = test.testClass
+                    } else {
+                        assert(testClassForSerial == test.testClass) {
+                            "Only one class should be executed on ${test.deviceSerial}" +
+                                    " (got ${test.testClass}" +
+                                    " but $testClassForSerial was executed there too)"
+                        }
+                    }
+                    acc
+                }
+                .entries
+                .toList()
+        assert(classPerDevice.size == 2) {
+            "Variants (N) should be executed on exactly 2 devices (got ${classPerDevice.size})"
+        }
+        assert((classPerDevice[0].key.compareTo(classPerDevice[1].key)) ==
+                (classPerDevice[0].value.compareTo(classPerDevice[1].value))) {
+            "Test classes should be executed only on expected devices"
+        }
+        assert(classPerDevice[0].value != classPerDevice[1].value) {
+            "Different variants (N) should be executed on different devices"
+        }
     }
 
     @Test
@@ -173,10 +231,10 @@ private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int
     val simplifiedResults = getSimplifiedResults()
 
     val testsPerDevice = simplifiedResults
-            .filter { pattern.matches(it.first) }
+            .filter { pattern.matches(it.testCase) }
             .fold(HashMap<String, AtomicInteger>()) { acc, test ->
                 acc
-                        .computeIfAbsent(test.second) { _ -> AtomicInteger(0) }
+                        .computeIfAbsent(test.deviceSerial) { _ -> AtomicInteger(0) }
                         .incrementAndGet()
                 acc
             }
@@ -192,7 +250,7 @@ private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int
     }
 }
 
-private fun getSimplifiedResults(): List<Pair<String, String>> {
+private fun getSimplifiedResults(): List<SimplifiedResult> {
     val poolSummaries = getSummaryData().getJSONArray("poolSummaries")
     assert(poolSummaries.length() == 1)
     val testResults = (poolSummaries[0] as JSONObject).getJSONArray("testResults")
@@ -201,7 +259,7 @@ private fun getSimplifiedResults(): List<Pair<String, String>> {
         val serial = result.getJSONObject("device").getString("serial")
         val testClass = result.getString("testClass")
         val testMethod = result.getString("testMethod")
-        "$testClass#$testMethod" to serial
+        SimplifiedResult("$testClass#$testMethod", serial)
     }
     return simplifiedResults
 }
@@ -219,3 +277,8 @@ private fun getSummaryJsonFile(): File {
     assert(jsons != null && jsons.isNotEmpty()) { "Summary json should be created" }
     return jsons[0]
 }
+
+private class SimplifiedResult(
+        val testCase: String,
+        val deviceSerial: String
+)
