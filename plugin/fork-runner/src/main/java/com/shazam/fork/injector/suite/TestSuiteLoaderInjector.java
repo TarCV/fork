@@ -11,14 +11,15 @@
 
 package com.shazam.fork.injector.suite;
 
+import com.shazam.fork.Configuration;
 import com.shazam.fork.pooling.PoolLoader;
 import com.shazam.fork.suite.DeviceTestPairsLoader;
 import com.shazam.fork.suite.DeviceTestPairsLoaderImpl;
 import com.shazam.fork.suite.JUnitTestSuiteLoader;
 import com.shazam.fork.suite.TestSuiteLoader;
 
+import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 import static com.shazam.fork.injector.pooling.PoolLoaderInjector.poolLoader;
-import static com.shazam.fork.injector.runner.RemoteAndroidTestRunnerFactoryInjector.remoteAndroidTestRunnerFactory;
 
 public class TestSuiteLoaderInjector {
 
@@ -26,7 +27,8 @@ public class TestSuiteLoaderInjector {
 
     public static TestSuiteLoader testSuiteLoader() {
         PoolLoader poolLoader = poolLoader();
-        DeviceTestPairsLoader deviceTestPairsLoader = new DeviceTestPairsLoaderImpl(poolLoader);
-        return new JUnitTestSuiteLoader(deviceTestPairsLoader, remoteAndroidTestRunnerFactory());
+        final Configuration configuration = configuration();
+        DeviceTestPairsLoader deviceTestPairsLoader = new DeviceTestPairsLoaderImpl(poolLoader, configuration);
+        return new JUnitTestSuiteLoader(deviceTestPairsLoader);
     }
 }

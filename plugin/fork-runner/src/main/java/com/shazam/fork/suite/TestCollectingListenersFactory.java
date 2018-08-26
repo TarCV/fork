@@ -12,27 +12,38 @@
 package com.shazam.fork.suite;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
+import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.runner.ProgressReporter;
+import com.shazam.fork.runner.listeners.RecordingTestRunListener;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 
 class TestCollectingListenersFactory implements TestRunListenersFactory {
-    private final List<TestCollectingListener> testCollectors;
+    private final List<TestCollectingListener> testCollectorsOut;
+    private final ForkConfiguration configuration;
 
-    TestCollectingListenersFactory(List<TestCollectingListener> testCollectors) {
-        this.testCollectors = testCollectors;
+    TestCollectingListenersFactory(List<TestCollectingListener> testCollectorsOut, ForkConfiguration configuration) {
+        this.testCollectorsOut = testCollectorsOut;
+        this.configuration = configuration;
     }
 
     @Override
     public List<ITestRunListener> createTestListeners(TestCaseEvent testCase, Device device, Pool pool, ProgressReporter progressReporter, Queue<TestCaseEvent> testCaseEventQueue) {
         TestCollectingListener testCollector = new TestCollectingListener(device);
-        testCollectors.add(testCollector);
-        return Collections.singletonList(testCollector);
+        testCollectorsOut.add(testCollector);
+
+        List<ITestRunListener> testRunListeners = new ArrayList<>();
+        testRunListeners.add(testCollector);
+
+        if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS) {
+            testRunListeners.add(new RecordingTestRunListener(device, true));
+        }
+        return testRunListeners;
     }
 }

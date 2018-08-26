@@ -14,6 +14,8 @@ import com.android.ddmlib.NullOutputReceiver
 import com.android.ddmlib.testrunner.ITestRunListener
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner
 import com.android.ddmlib.testrunner.TestIdentifier
+import com.shazam.fork.Configuration
+import com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN
 import com.shazam.fork.utils.DdmsUtils
 import com.shazam.fork.utils.DdmsUtils.unescapeInstrumentationArg
 import java.util.*
@@ -23,7 +25,15 @@ interface IRemoteAndroidTestRunnerFactory {
     fun properlyAddInstrumentationArg(runner: RemoteAndroidTestRunner, name: String, value: String)
 }
 
-class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
+fun androidTestRunnerFactory(configuration: Configuration): IRemoteAndroidTestRunnerFactory {
+    return if (configuration.forkIntegrationTestRunType == STUB_PARALLEL_TESTRUN) {
+        TestAndroidTestRunnerFactory()
+    } else {
+        RemoteAndroidTestRunnerFactory()
+    }
+}
+
+private class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     override fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner {
         return RemoteAndroidTestRunner(
                 testPackage,
@@ -36,7 +46,7 @@ class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     }
 }
 
-class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
+private class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     private val devices = Collections.synchronizedMap(HashMap<IDevice, Int>()) // to identify first/second device
 
     override fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner {
@@ -114,18 +124,16 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     }
 
     companion object {
-        const val functionalTestTestcaseDuration = 2345L
-
         private const val expectedTestPackage = "com.github.tarcv.forktestapp.test"
         private const val expectedTestRunner = "android.support.test.runner.AndroidJUnitRunner"
-        val logOnlyCommandPattern =
+        private val logOnlyCommandPattern =
                 ("am\\s+instrument -w -r" +
                         " -e log true" +
                         """\s+$expectedTestPackage\/$expectedTestRunner""")
                         .replace(".", "\\.")
                         .replace(" -", "\\s+-")
                         .toRegex()
-        val testCaseCommandPattern =
+        private val testCaseCommandPattern =
                 ("am\\s+instrument -w -r" +
                         " -e filterMethod ()" +
                         " -e filter com.shazam.fork.ondevice.ClassMethodFilter" +
@@ -163,6 +171,7 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
         )
     }
 }
+const val functionalTestTestcaseDuration = 2345L
 
 private class BroadcastingListener(
         private val targetListeners: Collection<ITestRunListener>

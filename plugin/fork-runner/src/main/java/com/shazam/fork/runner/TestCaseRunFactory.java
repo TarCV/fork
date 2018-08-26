@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Shazam Entertainment Limited
+ * Derivative work is Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -8,30 +9,28 @@
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-package com.shazam.fork.suite;
+package com.shazam.fork.runner;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
-import com.shazam.fork.runner.ProgressReporter;
-import com.shazam.fork.runner.TestRun;
-import com.shazam.fork.runner.TestRunFactory;
-import com.shazam.fork.runner.TestRunParameters;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
 import java.util.List;
 import java.util.Queue;
 
+import static com.shazam.fork.runner.RemoteAndroidTestRunnerFactoryKt.androidTestRunnerFactory;
 import static com.shazam.fork.runner.TestRunParameters.Builder.testRunParameters;
+import static com.shazam.fork.system.PermissionGrantingManager.permissionGrantingManager;
 
-public class TestListingRunFactory implements TestRunFactory {
+public class TestCaseRunFactory implements TestRunFactory {
 
     private final Configuration configuration;
     private final TestRunListenersFactory testRunListenersFactory;
 
-    TestListingRunFactory(Configuration configuration, TestRunListenersFactory testRunListenersFactory) {
+    public TestCaseRunFactory(Configuration configuration, TestRunListenersFactory testRunListenersFactory) {
         this.configuration = configuration;
         this.testRunListenersFactory = testRunListenersFactory;
     }
@@ -44,10 +43,14 @@ public class TestListingRunFactory implements TestRunFactory {
                                  Queue<TestCaseEvent> queueOfTestsInPool) {
         TestRunParameters testRunParameters = testRunParameters()
                 .withDeviceInterface(device.getDeviceInterface())
+                .withTest(testCase)
                 .withTestPackage(configuration.getInstrumentationPackage())
                 .withApplicationPackage(configuration.getApplicationPackage())
                 .withTestRunner(configuration.getTestRunnerClass())
+                .withTestSize(configuration.getTestSize())
                 .withTestOutputTimeout((int) configuration.getTestOutputTimeout())
+                .withCoverageEnabled(configuration.isCoverageEnabled())
+                .withExcludedAnnotation(configuration.getExcludedAnnotation())
                 .build();
 
         List<ITestRunListener> testRunListeners = testRunListenersFactory.createTestListeners(
@@ -57,9 +60,11 @@ public class TestListingRunFactory implements TestRunFactory {
                 progressReporter,
                 queueOfTestsInPool);
 
-        return new TestListingRun(
+        return new TestCaseRun(
                 pool.getName(),
                 testRunParameters,
-                testRunListeners);
+                testRunListeners,
+                permissionGrantingManager(),
+                androidTestRunnerFactory(configuration));
     }
 }

@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN;
-import static com.shazam.fork.runner.TestAndroidTestRunnerFactory.functionalTestTestcaseDuration;
+import static com.shazam.fork.runner.RemoteAndroidTestRunnerFactoryKt.functionalTestTestcaseDuration;
 import static java.lang.String.format;
 
 public class PoolLoader {

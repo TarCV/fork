@@ -13,6 +13,7 @@ package com.shazam.fork.suite;
 
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.Configuration;
+import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.pooling.NoDevicesForPoolException;
@@ -43,9 +44,11 @@ import static com.shazam.fork.injector.system.InstallerInjector.installer;
 public class DeviceTestPairsLoaderImpl implements DeviceTestPairsLoader {
     private final Logger logger = LoggerFactory.getLogger(DeviceTestPairsLoaderImpl.class);
     private final PoolLoader poolLoader;
+    private final ForkConfiguration configuration;
 
-    public DeviceTestPairsLoaderImpl(PoolLoader poolLoader) {
+    public DeviceTestPairsLoaderImpl(PoolLoader poolLoader, ForkConfiguration configuration) {
         this.poolLoader = poolLoader;
+        this.configuration = configuration;
     }
 
     @Override
@@ -58,7 +61,7 @@ public class DeviceTestPairsLoaderImpl implements DeviceTestPairsLoader {
             CountDownLatch poolCountDownLatch = new CountDownLatch(numberOfPools);
             poolExecutor = namedExecutor(numberOfPools, "PoolSuiteLoader-%d");
 
-            TestRunListenersFactory testCollectorFactory = new TestCollectingListenersFactory(testCollectors);
+            TestRunListenersFactory testCollectorFactory = new TestCollectingListenersFactory(testCollectors, configuration);
 
             final Installer installer = installer();
             final Configuration configuration = configuration();

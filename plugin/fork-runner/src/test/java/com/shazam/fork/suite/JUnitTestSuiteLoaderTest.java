@@ -51,7 +51,7 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class2", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
 
         Assert.assertThat(result, containsInAnyOrder(
                 allOf(
@@ -80,7 +80,7 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class", "test", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
 
         Assert.assertThat(result, contains(
                 allOf(
@@ -103,7 +103,7 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class22", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
 
         Assert.assertThat(result, containsInAnyOrder(
                 allOf(

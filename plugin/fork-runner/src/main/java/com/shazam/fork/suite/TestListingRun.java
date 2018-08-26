@@ -17,6 +17,7 @@ import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
+import com.shazam.fork.runner.IRemoteAndroidTestRunnerFactory;
 import com.shazam.fork.runner.TestRun;
 import com.shazam.fork.runner.TestRunParameters;
 
@@ -31,23 +32,25 @@ class TestListingRun implements TestRun {
     private final String poolName;
     private final TestRunParameters testRunParameters;
     private final List<ITestRunListener> testRunListeners;
+    private final IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory;
 
     public TestListingRun(String poolName,
                           TestRunParameters testRunParameters,
-                          List<ITestRunListener> testRunListeners) {
+                          List<ITestRunListener> testRunListeners,
+                          IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory)
+    {
         this.poolName = poolName;
         this.testRunParameters = testRunParameters;
         this.testRunListeners = testRunListeners;
+        this.remoteAndroidTestRunnerFactory = remoteAndroidTestRunnerFactory;
     }
 
     @Override
     public void execute() {
         IDevice device = testRunParameters.getDeviceInterface();
 
-        RemoteAndroidTestRunner runner = new RemoteAndroidTestRunner(
-                testRunParameters.getTestPackage(),
-                testRunParameters.getTestRunner(),
-                device);
+		RemoteAndroidTestRunner runner =
+				remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(testRunParameters.getTestPackage(), testRunParameters.getTestRunner(), device);
 
         runner.setRunName(poolName);
         runner.setMaxtimeToOutputResponse(testRunParameters.getTestOutputTimeout());
@@ -56,7 +59,7 @@ class TestListingRun implements TestRun {
         try {
             runner.run(testRunListeners);
         } catch (ShellCommandUnresponsiveException | TimeoutException e) {
-            logger.warn("Test runner got stuck and test suite building was interrupted. " +
+            logger.warn("Test runner got stuck and test list collection was interrupeted. " +
                     " Depending on number of available devices some tests will not be run." +
                     " You can increase the timeout in settings if it's too strict");
         } catch (AdbCommandRejectedException | IOException e) {

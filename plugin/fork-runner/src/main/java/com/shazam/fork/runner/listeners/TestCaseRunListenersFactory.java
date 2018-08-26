@@ -14,6 +14,7 @@ package com.shazam.fork.runner.listeners;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.google.gson.Gson;
 import com.shazam.fork.Configuration;
+import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.device.DeviceTestFilesCleanerImpl;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
@@ -23,6 +24,8 @@ import com.shazam.fork.runner.TestRetryerImpl;
 import com.shazam.fork.system.io.FileManager;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 
@@ -50,7 +53,7 @@ public class TestCaseRunListenersFactory implements TestRunListenersFactory {
                                                       Pool pool,
                                                       ProgressReporter progressReporter,
                                                       Queue<TestCaseEvent> testCaseEventQueue) {
-        return asList(
+        final List<ITestRunListener> normalListeners = asList(
                 new ProgressTestRunListener(pool, progressReporter),
                 getForkXmlTestRunListener(fileManager, configuration.getOutput(), pool, device, testCase, progressReporter),
                 new ConsoleLoggingTestRunListener(configuration.getTestPackage(), device.getSerial(),
@@ -60,6 +63,13 @@ public class TestCaseRunListenersFactory implements TestRunListenersFactory {
                 getScreenTraceTestRunListener(fileManager, pool, device),
                 buildRetryListener(testCase, device, pool, progressReporter, testCaseEventQueue),
                 getCoverageTestRunListener(configuration, device, fileManager, pool, testCase));
+        if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS) {
+            ArrayList<ITestRunListener> testListeners = new ArrayList<>(normalListeners);
+            testListeners.add(new RecordingTestRunListener(device, false));
+            return Collections.unmodifiableList(testListeners);
+        } else {
+            return normalListeners;
+        }
     }
 
     private RetryListener buildRetryListener(TestCaseEvent testCase,

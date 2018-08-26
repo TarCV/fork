@@ -39,6 +39,7 @@ class TestCollectingListener implements ITestRunListener {
     @Override
     public void testStarted(TestIdentifier test) {
         tests.add(new DeviceTestPair(device, test));
+        System.out.println("" + this + ": Added test " + test);
     }
 
     @Override

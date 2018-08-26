@@ -12,6 +12,7 @@ package com.shazam.fork.runner;
 
 import com.android.ddmlib.AdbCommandRejectedException;
 import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
@@ -29,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-import static com.shazam.fork.utils.DdmsUtils.properlyAddInstrumentationArg;
 import static java.lang.String.format;
 
 class TestCaseRun implements TestRun {
@@ -38,15 +38,18 @@ class TestCaseRun implements TestRun {
 	private final TestRunParameters testRunParameters;
 	private final List<ITestRunListener> testRunListeners;
 	private final PermissionGrantingManager permissionGrantingManager;
+	private final IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory;
 
 	public TestCaseRun(String poolName,
 					   TestRunParameters testRunParameters,
 					   List<ITestRunListener> testRunListeners,
-					   PermissionGrantingManager permissionGrantingManager) {
+					   PermissionGrantingManager permissionGrantingManager,
+                       IRemoteAndroidTestRunnerFactory remoteAndroidTestRunnerFactory) {
         this.poolName = poolName;
 		this.testRunParameters = testRunParameters;
 		this.testRunListeners = testRunListeners;
 		this.permissionGrantingManager = permissionGrantingManager;
+		this.remoteAndroidTestRunnerFactory = remoteAndroidTestRunnerFactory;
 	}
 
 	@Override
@@ -54,10 +57,8 @@ class TestCaseRun implements TestRun {
 		String applicationPackage = testRunParameters.getApplicationPackage();
 		IDevice device = testRunParameters.getDeviceInterface();
 
-		RemoteAndroidTestRunner runner = new RemoteAndroidTestRunner(
-				testRunParameters.getTestPackage(),
-				testRunParameters.getTestRunner(),
-				device);
+		RemoteAndroidTestRunner runner =
+				remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(testRunParameters.getTestPackage(), testRunParameters.getTestRunner(), device);
 
 		TestCaseEvent test = testRunParameters.getTest();
 		String testClassName = test.getTestClass();
@@ -71,8 +72,8 @@ class TestCaseRun implements TestRun {
 
 		// Custom filter is required to support Parameterized tests with default names
 		runner.addInstrumentationArg("filter", "com.shazam.fork.ondevice.ClassMethodFilter");
-		properlyAddInstrumentationArg(runner, "filterClass", testClassName);
-		properlyAddInstrumentationArg(runner, "filterMethod", testMethodName);
+		remoteAndroidTestRunnerFactory.properlyAddInstrumentationArg(runner, "filterClass", testClassName);
+		remoteAndroidTestRunnerFactory.properlyAddInstrumentationArg(runner, "filterMethod", testMethodName);
 
         if (testRunParameters.isCoverageEnabled()) {
             runner.setCoverage(true);
@@ -85,6 +86,9 @@ class TestCaseRun implements TestRun {
 		} else {
 			logger.info("No excluding any test based on annotations");
 		}
+
+		clearPackageData(device, applicationPackage);
+		clearPackageData(device, testRunParameters.getTestPackage());
 
 		List<String> permissionsToRevoke = testRunParameters.getTest().getPermissionsToRevoke();
 
@@ -102,4 +106,16 @@ class TestCaseRun implements TestRun {
 		}
 
     }
+
+	private void clearPackageData(IDevice device, String applicationPackage) {
+		long start = System.currentTimeMillis();
+
+		try {
+			device.executeShellCommand(format("pm clear %s", applicationPackage), new NullOutputReceiver());
+		} catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException e) {
+			throw new UnsupportedOperationException(format("Unable to clear package data (%s)", applicationPackage), e);
+		}
+
+		logger.debug("Clearing application data: {} (took {}ms)", applicationPackage, (System.currentTimeMillis() - start));
+	}
 }
