@@ -12,6 +12,7 @@ package com.shazam.fork.suite;
 
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.shazam.fork.model.Device;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,9 +23,14 @@ import java.util.Set;
  * Records identifiers of started tests
  */
 class TestCollectingListener implements ITestRunListener {
-    private final Set<TestIdentifier> tests = Collections.synchronizedSet(new HashSet<>());
+    private final Device device;
+    private final Set<DeviceTestPair> tests = Collections.synchronizedSet(new HashSet<>());
 
-    public Set<TestIdentifier> getTests() {
+    TestCollectingListener(Device device) {
+        this.device = device;
+    }
+
+    public Set<DeviceTestPair> getTests() {
         synchronized (tests) {
             return Collections.unmodifiableSet(new HashSet<>(tests));
         }
@@ -32,7 +38,7 @@ class TestCollectingListener implements ITestRunListener {
 
     @Override
     public void testStarted(TestIdentifier test) {
-        tests.add(test);
+        tests.add(new DeviceTestPair(device, test));
     }
 
     @Override

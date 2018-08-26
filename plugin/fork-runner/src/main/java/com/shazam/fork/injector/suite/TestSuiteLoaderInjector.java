@@ -11,6 +11,9 @@
 
 package com.shazam.fork.injector.suite;
 
+import com.shazam.fork.pooling.PoolLoader;
+import com.shazam.fork.suite.DeviceTestPairsLoader;
+import com.shazam.fork.suite.DeviceTestPairsLoaderImpl;
 import com.shazam.fork.suite.JUnitTestSuiteLoader;
 import com.shazam.fork.suite.TestSuiteLoader;
 
@@ -22,6 +25,8 @@ public class TestSuiteLoaderInjector {
     private TestSuiteLoaderInjector() {}
 
     public static TestSuiteLoader testSuiteLoader() {
-        return new JUnitTestSuiteLoader(poolLoader(), remoteAndroidTestRunnerFactory());
+        PoolLoader poolLoader = poolLoader();
+        DeviceTestPairsLoader deviceTestPairsLoader = new DeviceTestPairsLoaderImpl(poolLoader);
+        return new JUnitTestSuiteLoader(deviceTestPairsLoader, remoteAndroidTestRunnerFactory());
     }
 }

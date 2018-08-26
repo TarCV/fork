@@ -1,5 +1,6 @@
 /*
  * Copyright 2015 Shazam Entertainment Limited
+ * Derivative work is Copyright 2018 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -10,6 +11,7 @@
 
 package com.shazam.fork.injector.runner;
 
+import com.shazam.fork.runner.TestCaseRunFactory;
 import com.shazam.fork.runner.TestRunFactory;
 
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
@@ -20,6 +22,6 @@ public class TestRunFactoryInjector {
     private TestRunFactoryInjector() {}
 
     public static TestRunFactory testRunFactory() {
-        return new TestRunFactory(configuration(), testRunListenersFactory());
+        return new TestCaseRunFactory(configuration(), testRunListenersFactory());
     }
 }

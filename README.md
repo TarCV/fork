@@ -4,10 +4,11 @@ Goals of this fork
 
  - [x] Use JUnit 4 facilities to get list of test methods to execute
  (possibly with childs created by runners such as Parameterized)
+ **This feature breaks support of original Fork annotations**
 
  - [x] Support all the runners provided out of box in ASTL (in theory they should be supported. Although there is no integration tests for them, so please file issues in case they are not)
 
- - [ ] Support cases where some testcases are disabled on some
+ - [x] Support cases where some testcases are disabled on some
   devices via annotations or filters
 
  - [ ] Support passing instrumentation arguments (including custom filters)
@@ -17,7 +18,7 @@ Goals of this fork
  - [ ] Option to clean/reinstall tested app before testcase execution
 
  - [ ] Restore support of original Fork annotations
- 
+
  - [ ] Make Flakiness reports customizable
 
 ***Original README content below***
