@@ -19,6 +19,7 @@ import com.shazam.fork.device.DeviceTestFilesCleanerImpl;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.runner.ProgressReporter;
 import com.shazam.fork.runner.TestRetryerImpl;
 import com.shazam.fork.system.io.FileManager;
@@ -27,7 +28,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
 
 import static com.shazam.fork.model.Diagnostics.SCREENSHOTS;
 import static com.shazam.fork.model.Diagnostics.VIDEO;
@@ -52,7 +52,7 @@ public class TestCaseRunListenersFactory implements TestRunListenersFactory {
                                                       Device device,
                                                       Pool pool,
                                                       ProgressReporter progressReporter,
-                                                      Queue<TestCaseEvent> testCaseEventQueue) {
+                                                      TestEventQueue testCaseEventQueue) {
         final List<ITestRunListener> normalListeners = asList(
                 new ProgressTestRunListener(pool, progressReporter),
                 getForkXmlTestRunListener(fileManager, configuration.getOutput(), pool, device, testCase, progressReporter),
@@ -76,7 +76,7 @@ public class TestCaseRunListenersFactory implements TestRunListenersFactory {
                                              Device device,
                                              Pool pool,
                                              ProgressReporter progressReporter,
-                                             Queue<TestCaseEvent> testCaseEventQueue) {
+                                             TestEventQueue testCaseEventQueue) {
         TestRetryerImpl testRetryer = new TestRetryerImpl(progressReporter, pool, testCaseEventQueue);
         DeviceTestFilesCleanerImpl deviceTestFilesCleaner = new DeviceTestFilesCleanerImpl(fileManager, pool, device);
         return new RetryListener(pool, device, testCase, testRetryer, deviceTestFilesCleaner);

@@ -16,6 +16,7 @@ import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.runner.TestRetryer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class RetryListener extends NoOpITestRunListener {
     }
 
     private void rescheduleTestExecution(TestIdentifier test) {
-        if (testRetryer.rescheduleTestExecution(test, currentTestCaseEvent)) {
+        if (testRetryer.rescheduleTestExecution(test, currentTestCaseEvent, device)) {
             logger.info("Test " + test.toString() + " enqueued again into pool:" + pool.getName());
             removeFailureTraceFiles(test);
         } else {

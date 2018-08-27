@@ -16,13 +16,13 @@ import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.runner.ProgressReporter;
 import com.shazam.fork.runner.listeners.RecordingTestRunListener;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 class TestCollectingListenersFactory implements TestRunListenersFactory {
     private final List<TestCollectingListener> testCollectorsOut;
@@ -34,7 +34,7 @@ class TestCollectingListenersFactory implements TestRunListenersFactory {
     }
 
     @Override
-    public List<ITestRunListener> createTestListeners(TestCaseEvent testCase, Device device, Pool pool, ProgressReporter progressReporter, Queue<TestCaseEvent> testCaseEventQueue) {
+    public List<ITestRunListener> createTestListeners(TestCaseEvent testCase, Device device, Pool pool, ProgressReporter progressReporter, TestEventQueue testCaseEventQueue) {
         TestCollectingListener testCollector = new TestCollectingListener(device);
         testCollectorsOut.add(testCollector);
 

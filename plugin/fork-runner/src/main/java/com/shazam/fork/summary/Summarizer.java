@@ -11,7 +11,7 @@
 package com.shazam.fork.summary;
 
 import com.shazam.fork.model.Pool;
-import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 
 import java.util.Collection;
 
@@ -27,7 +27,7 @@ public class Summarizer {
         this.outcomeAggregator = outcomeAggregator;
     }
 
-    boolean summarize(Collection<Pool> pools, Collection<TestCaseEvent> testCases) {
+    boolean summarize(Collection<Pool> pools, TestEventQueue testCases) {
         Summary summary = summaryCompiler.compileSummary(pools, testCases);
         summaryPrinter.print(summary);
         return outcomeAggregator.aggregate(summary);

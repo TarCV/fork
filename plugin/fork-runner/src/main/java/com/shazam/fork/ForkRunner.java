@@ -13,8 +13,10 @@
 package com.shazam.fork;
 
 import com.shazam.fork.model.Pool;
-import com.shazam.fork.model.TestCaseEvent;
-import com.shazam.fork.pooling.*;
+import com.shazam.fork.model.TestEventQueue;
+import com.shazam.fork.pooling.NoDevicesForPoolException;
+import com.shazam.fork.pooling.NoPoolLoaderConfiguredException;
+import com.shazam.fork.pooling.PoolLoader;
 import com.shazam.fork.runner.PoolTestRunnerFactory;
 import com.shazam.fork.runner.ProgressReporter;
 import com.shazam.fork.suite.NoTestCasesFoundException;
@@ -59,7 +61,7 @@ public class ForkRunner {
             CountDownLatch poolCountDownLatch = new CountDownLatch(numberOfPools);
             poolExecutor = namedExecutor(numberOfPools, "PoolExecutor-%d");
 
-            Collection<TestCaseEvent> testCases = testClassLoader.loadTestSuite();
+            TestEventQueue testCases = testClassLoader.loadTestSuite();
             summaryGeneratorHook.registerHook(pools, testCases);
 
             progressReporter.start();

@@ -14,12 +14,11 @@ package com.shazam.fork.runner;
 
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
-import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
@@ -30,14 +29,14 @@ public class PoolTestRunner implements Runnable {
     public static final String DROPPED_BY = "DroppedBy-";
 
     private final Pool pool;
-    private final Queue<TestCaseEvent> testCases;
+    private final TestEventQueue testCases;
     private final CountDownLatch poolCountDownLatch;
     private final DeviceTestRunnerFactory deviceTestRunnerFactory;
     private final ProgressReporter progressReporter;
 
     public PoolTestRunner(DeviceTestRunnerFactory deviceTestRunnerFactory,
                           Pool pool,
-                          Queue<TestCaseEvent> testCases,
+                          TestEventQueue testCases,
                           CountDownLatch poolCountDownLatch,
                           ProgressReporter progressReporter) {
         this.pool = pool;

@@ -10,10 +10,11 @@
 
 package com.shazam.fork.runner;
 
-import com.shazam.fork.model.*;
+import com.shazam.fork.model.Device;
+import com.shazam.fork.model.Pool;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.system.adb.Installer;
 
-import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
 public class DeviceTestRunnerFactory {
@@ -27,7 +28,7 @@ public class DeviceTestRunnerFactory {
     }
 
     public Runnable createDeviceTestRunner(Pool pool,
-                                           Queue<TestCaseEvent> testClassQueue,
+                                           TestEventQueue testClassQueue,
                                            CountDownLatch deviceInPoolCountDownLatch,
                                            Device device,
                                            ProgressReporter progressReporter

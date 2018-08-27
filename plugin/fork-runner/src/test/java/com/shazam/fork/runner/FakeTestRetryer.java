@@ -1,6 +1,7 @@
 package com.shazam.fork.runner;
 
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.shazam.fork.model.Device;
 import com.shazam.fork.model.TestCaseEvent;
 
 public class FakeTestRetryer implements TestRetryer {
@@ -19,7 +20,7 @@ public class FakeTestRetryer implements TestRetryer {
     }
 
     @Override
-    public boolean rescheduleTestExecution(TestIdentifier testIdentifier, TestCaseEvent testCaseEvent) {
+    public boolean rescheduleTestExecution(TestIdentifier testIdentifier, TestCaseEvent testCaseEvent, Device device) {
         return result;
     }
 }

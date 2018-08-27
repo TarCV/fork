@@ -73,8 +73,6 @@ public class DeviceTestPairsLoaderImpl implements DeviceTestPairsLoader {
                             testListingRunFactory
                     );
 
-            ArrayDeque<TestCaseEvent> dummyQueue = createDummyQueue();
-
             PoolTestRunnerFactory poolTestRunnerFactory = new PoolTestRunnerFactory(
                     deviceTestRunnerFactory
             );
@@ -82,7 +80,8 @@ public class DeviceTestPairsLoaderImpl implements DeviceTestPairsLoader {
             ProgressReporter progressReporter = new TestListingProgressTracker();
             progressReporter.start();
             for (Pool pool : pools) {
-                Runnable poolTestRunner = poolTestRunnerFactory.createPoolTestRunner(pool, dummyQueue,
+                Runnable poolTestRunner = poolTestRunnerFactory.createPoolTestRunner(pool,
+                        new OneDummyTestPerDeviceQueue(pool.size()),
                         poolCountDownLatch, progressReporter);
                 poolExecutor.execute(poolTestRunner);
             }

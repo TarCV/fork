@@ -13,7 +13,7 @@
 package com.shazam.fork.summary;
 
 import com.shazam.fork.model.Pool;
-import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class SummaryGeneratorHook extends Thread {
     private final Summarizer summarizer;
 
     private Collection<Pool> pools;
-    private Collection<TestCaseEvent> testCases;
+    private TestEventQueue testCases;
 
     public SummaryGeneratorHook(Summarizer summarizer) {
         this.summarizer = summarizer;
@@ -41,11 +41,10 @@ public class SummaryGeneratorHook extends Thread {
     /**
      * Sets the pools and test classes for which a summary will be created either at normal execution or as a
      * shutdown hook.
-     *
-     * @param pools the pools to consider for the summary
+     *  @param pools the pools to consider for the summary
      * @param testCases the test cases for the summary
      */
-    public void registerHook(Collection<Pool> pools, Collection<TestCaseEvent> testCases) {
+    public void registerHook(Collection<Pool> pools, TestEventQueue testCases) {
         this.pools = pools;
         this.testCases = testCases;
         Runtime.getRuntime().addShutdownHook(this);
@@ -53,7 +52,7 @@ public class SummaryGeneratorHook extends Thread {
 
     /**
      * This only gets executed once, but needs to check the flag in case it finished normally and then shutdown.
-     * It can only be called after {@link SummaryGeneratorHook#registerHook(Collection, Collection)}.
+     * It can only be called after {@link SummaryGeneratorHook#registerHook(Collection, TestEventQueue)}.
      *
      * @return <code>true</code> - if tests have passed
      */

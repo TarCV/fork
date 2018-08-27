@@ -7,6 +7,7 @@ import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.runner.TestRetryer;
 import com.shazam.fork.util.TestPipelineEmulator;
+
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -41,7 +42,7 @@ public class RetryListenerTest {
                 new RetryListener(pool, device, fatalCrashedTestCaseEvent, testRetryer, deviceTestFilesCleaner);
 
         mockery.checking(new Expectations() {{
-            oneOf(testRetryer).rescheduleTestExecution(fatalCrashedTest, fatalCrashedTestCaseEvent);
+            oneOf(testRetryer).rescheduleTestExecution(fatalCrashedTest, fatalCrashedTestCaseEvent, device);
             will(returnValue(true));
 
             oneOf(deviceTestFilesCleaner).deleteTraceFiles(fatalCrashedTest);
@@ -59,7 +60,7 @@ public class RetryListenerTest {
                 new RetryListener(pool, device, fatalCrashedTestCaseEvent, testRetryer, deviceTestFilesCleaner);
 
         mockery.checking(new Expectations() {{
-            oneOf(testRetryer).rescheduleTestExecution(fatalCrashedTest, fatalCrashedTestCaseEvent);
+            oneOf(testRetryer).rescheduleTestExecution(fatalCrashedTest, fatalCrashedTestCaseEvent, device);
             will(returnValue(false));
 
             never(deviceTestFilesCleaner).deleteTraceFiles(fatalCrashedTest);

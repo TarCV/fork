@@ -14,13 +14,12 @@ package com.shazam.fork.runner;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
-
-import java.util.Queue;
+import com.shazam.fork.model.TestEventQueue;
 
 public interface TestRunFactory {
     TestRun createTestRun(TestCaseEvent testCase,
                           Device device,
                           Pool pool,
                           ProgressReporter progressReporter,
-                          Queue<TestCaseEvent> queueOfTestsInPool);
+                          TestEventQueue queueOfTestsInPool);
 }

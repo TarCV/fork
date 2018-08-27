@@ -10,35 +10,9 @@
 
 package com.shazam.fork.model
 
-import java.util.*
-
-/**
- * Queue of test case events with ability to poll events for a specific device
- */
-class TestEventQueue private constructor(private val eventList: MutableList<TestCaseEvent>)
-    : List<TestCaseEvent> by eventList {
-
-    constructor(eventCollection: Collection<TestCaseEvent>)
-            : this(Collections.synchronizedList(ArrayList(eventCollection)))
-
-    fun pollForDevice(device: Device): TestCaseEvent? {
-        synchronized(eventList) {
-            var index = 0
-            for (testCaseEvent in eventList) {
-                val found = if (testCaseEvent is LimitedTestCaseEvent) {
-                    testCaseEvent.isSupportedDevice(device)
-                } else {
-                    true
-                }
-
-                if (found) {
-                    eventList.removeAt(index)
-                    return testCaseEvent
-                } else {
-                    ++index
-                }
-            }
-            return null
-        }
-    }
+interface TestEventQueue {
+    fun pollForDevice(device: Device): TestCaseEvent?
+    fun offerFromDevice(test: TestCaseEvent, device: Device)
+    fun size(): Int
+    fun toCollection(): Collection<TestCaseEvent>
 }

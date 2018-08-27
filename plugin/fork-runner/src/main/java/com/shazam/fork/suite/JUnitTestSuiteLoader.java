@@ -15,6 +15,7 @@ import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.LimitedTestCaseEvent;
 import com.shazam.fork.model.TestEventQueue;
+import com.shazam.fork.model.TestEventQueueImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
         if (limitedTestCaseEvents.isEmpty()) {
             throw new NoTestCasesFoundException("No compatible tests cases were found");
         }
-        return new TestEventQueue(limitedTestCaseEvents);
+        return new TestEventQueueImpl(limitedTestCaseEvents);
     }
 
     private static List<LimitedTestCaseEvent> buildTestSlotList(Stream<DeviceTestPair> deviceTestPairStream) {

@@ -15,6 +15,7 @@ import com.shazam.fork.Configuration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.runner.ProgressReporter;
 import com.shazam.fork.runner.TestRun;
 import com.shazam.fork.runner.TestRunFactory;
@@ -22,7 +23,6 @@ import com.shazam.fork.runner.TestRunParameters;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 
 import java.util.List;
-import java.util.Queue;
 
 import static com.shazam.fork.runner.RemoteAndroidTestRunnerFactoryKt.androidTestRunnerFactory;
 import static com.shazam.fork.runner.TestRunParameters.Builder.testRunParameters;
@@ -42,7 +42,7 @@ public class TestListingRunFactory implements TestRunFactory {
                                  Device device,
                                  Pool pool,
                                  ProgressReporter progressReporter,
-                                 Queue<TestCaseEvent> queueOfTestsInPool) {
+                                 TestEventQueue queueOfTestsInPool) {
         TestRunParameters testRunParameters = testRunParameters()
                 .withDeviceInterface(device.getDeviceInterface())
                 .withTestPackage(configuration.getInstrumentationPackage())

@@ -12,19 +12,27 @@
  */
 package com.shazam.fork.runner;
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.DdmPreferences;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.shazam.fork.model.Device;
-import com.shazam.fork.model.*;
+import com.shazam.fork.model.Pool;
+import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.system.adb.Installer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
-import static com.shazam.fork.system.io.RemoteFileManager.*;
+import static com.shazam.fork.system.io.RemoteFileManager.createCoverageDirectory;
+import static com.shazam.fork.system.io.RemoteFileManager.createRemoteDirectory;
+import static com.shazam.fork.system.io.RemoteFileManager.removeRemoteDirectory;
 
 public class DeviceTestRunner implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(DeviceTestRunner.class);
@@ -32,7 +40,7 @@ public class DeviceTestRunner implements Runnable {
     private final Installer installer;
     private final Pool pool;
     private final Device device;
-    private final Queue<TestCaseEvent> queueOfTestsInPool;
+    private final TestEventQueue queueOfTestsInPool;
     private final CountDownLatch deviceCountDownLatch;
     private final ProgressReporter progressReporter;
     private final TestRunFactory testRunFactory;
@@ -40,7 +48,7 @@ public class DeviceTestRunner implements Runnable {
     public DeviceTestRunner(Installer installer,
                             Pool pool,
                             Device device,
-                            Queue<TestCaseEvent> queueOfTestsInPool,
+                            TestEventQueue queueOfTestsInPool,
                             CountDownLatch deviceCountDownLatch,
                             ProgressReporter progressReporter,
                             TestRunFactory testRunFactory) {
@@ -66,7 +74,7 @@ public class DeviceTestRunner implements Runnable {
             clearLogcat(deviceInterface);
 
             TestCaseEvent testCaseEvent;
-            while ((testCaseEvent = queueOfTestsInPool.poll()) != null) {
+            while ((testCaseEvent = queueOfTestsInPool.pollForDevice(device)) != null) {
                 TestRun testRun = testRunFactory.createTestRun(testCaseEvent,
                         device,
                         pool,

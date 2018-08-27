@@ -15,15 +15,15 @@ import com.android.ddmlib.testrunner.ITestRunListener;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueue;
 import com.shazam.fork.runner.ProgressReporter;
 
 import java.util.List;
-import java.util.Queue;
 
 public interface TestRunListenersFactory {
     List<ITestRunListener> createTestListeners(TestCaseEvent testCase,
                                                Device device,
                                                Pool pool,
                                                ProgressReporter progressReporter,
-                                               Queue<TestCaseEvent> testCaseEventQueue);
+                                               TestEventQueue testCaseEventQueue);
 }
