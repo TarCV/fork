@@ -10,8 +10,12 @@
 
 package com.shazam.fork.injector.pooling;
 
+import com.shazam.fork.Configuration;
 import com.shazam.fork.pooling.PoolLoader;
+import com.shazam.fork.pooling.PoolLoaderImpl;
+import com.shazam.fork.pooling.StubPoolLoader;
 
+import static com.shazam.fork.ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN;
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 import static com.shazam.fork.injector.device.DeviceLoaderInjector.deviceLoader;
 
@@ -20,6 +24,11 @@ public class PoolLoaderInjector {
     private PoolLoaderInjector() {}
 
     public static PoolLoader poolLoader() {
-        return new PoolLoader(deviceLoader(), configuration());
+        Configuration configuration = configuration();
+        if (configuration.getForkIntegrationTestRunType() == STUB_PARALLEL_TESTRUN) {
+            return new StubPoolLoader();
+        } else {
+            return new PoolLoaderImpl(deviceLoader(), configuration);
+        }
     }
 }

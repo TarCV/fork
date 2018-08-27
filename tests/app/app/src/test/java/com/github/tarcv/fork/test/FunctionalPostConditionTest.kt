@@ -55,9 +55,9 @@ class FunctionalPostConditionTest {
     @Test
     fun testDeviceNOnlyTestExecutedCorrectly() {
         doAssertionsForParameterizedTests(
-                """$packageForRegex\.Device1OnlyTestExecutedCorrectly#test\[\s*param = .+]""".toRegex(), 3)
+                """$packageForRegex\.Device1OnlyTest#test\[\s*param = .+]""".toRegex(), 3, 1)
         doAssertionsForParameterizedTests(
-                """$packageForRegex\.Device2OnlyTestExecutedCorrectly#test\[\s*param = .+]""".toRegex(), 3)
+                """$packageForRegex\.Device2OnlyTest#test\[\s*param = .+]""".toRegex(), 3, 1)
     }
 
     @Test
@@ -93,10 +93,6 @@ class FunctionalPostConditionTest {
                 .toList()
         assert(classPerDevice.size == 2) {
             "Variants (N) should be executed on exactly 2 devices (got ${classPerDevice.size})"
-        }
-        assert((classPerDevice[0].key.compareTo(classPerDevice[1].key)) ==
-                (classPerDevice[0].value.compareTo(classPerDevice[1].value))) {
-            "Test classes should be executed only on expected devices"
         }
         assert(classPerDevice[0].value != classPerDevice[1].value) {
             "Different variants (N) should be executed on different devices"
@@ -227,7 +223,7 @@ private fun executeCommandWithOutput(cmd: CommandLine): String {
     return outputStream.toString()
 }
 
-private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int) {
+private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int, devicesNum: Int = 2) {
     val simplifiedResults = getSimplifiedResults()
 
     val testsPerDevice = simplifiedResults
@@ -241,12 +237,15 @@ private fun doAssertionsForParameterizedTests(pattern: Regex, expectedCount: Int
             .entries
             .toList()
     assert(testsPerDevice.isNotEmpty()) { "Parameterized tests should be executed" }
-    assert(testsPerDevice.size == 2) { "Variants should be executed on exactly 2 devices (got ${testsPerDevice.size})" }
-    assert(testsPerDevice[0].value.get() > 0) { "At least one parameterized test should be executed on ${testsPerDevice[0].key} device" }
-    assert(testsPerDevice[1].value.get() > 0) { "At least one parameterized test should be executed on ${testsPerDevice[1].key} device" }
-    assert(testsPerDevice[0].value.get() + testsPerDevice[1].value.get() == expectedCount) {
-        "Exactly $expectedCount parameterized tests should be executed" +
-                " (device1=${testsPerDevice[0].value.get()}, device2=${testsPerDevice[1].value.get()})"
+    assert(testsPerDevice.size == devicesNum) { "Variants should be executed on exactly 2 devices (got ${testsPerDevice.size})" }
+
+    var testCount = 0
+    for (i in 0 until devicesNum) {
+        assert(testsPerDevice[i].value.get() > 0) { "At least one parameterized test should be executed on ${testsPerDevice[i].key} device" }
+        testCount += testsPerDevice[i].value.get()
+    }
+    assert(testCount == expectedCount) {
+        "Exactly $expectedCount parameterized tests should be executed (got $testCount)"
     }
 }
 

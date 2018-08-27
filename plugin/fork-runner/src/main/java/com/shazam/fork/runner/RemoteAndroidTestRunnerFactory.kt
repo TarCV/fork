@@ -47,13 +47,9 @@ private class RemoteAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
 }
 
 private class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
-    private val devices = Collections.synchronizedMap(HashMap<IDevice, Int>()) // to identify first/second device
-
     override fun createRemoteAndroidTestRunner(testPackage: String, testRunner: String, device: IDevice): RemoteAndroidTestRunner {
         synchronized(devices) {
-            devices.computeIfAbsent(device) {
-                devices.size
-            }
+            devices.computeIfAbsent(device) { devices.size }
         }
 
         return object : RemoteAndroidTestRunner(
@@ -124,6 +120,8 @@ private class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
     }
 
     companion object {
+        private val devices = Collections.synchronizedMap(HashMap<IDevice, Int>()) // to identify first/second device
+
         private const val expectedTestPackage = "com.github.tarcv.forktestapp.test"
         private const val expectedTestRunner = "android.support.test.runner.AndroidJUnitRunner"
         private val logOnlyCommandPattern =

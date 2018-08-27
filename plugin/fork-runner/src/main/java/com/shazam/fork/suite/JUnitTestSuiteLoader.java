@@ -56,7 +56,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                 mapping(DeviceTestPair::getDevice, toSet())));
         return testDevicesMap.entrySet().stream()
                 .map(testIdentifierSetEntry -> new LimitedTestCaseEvent(testIdentifierSetEntry.getKey(), testIdentifierSetEntry.getValue()))
-                .sorted(Comparator.comparingInt(o -> o.getSupportedDevices().size()))
+                .sorted(Comparator.comparingInt(o -> o.getSupportedDevices().size())) // TODO: move this line into TestEventQueue
                     // To make execution optimal tests supporting the least devices should be first
                 .collect(toList());
     }
