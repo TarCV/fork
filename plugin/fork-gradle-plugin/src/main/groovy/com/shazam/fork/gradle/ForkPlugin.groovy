@@ -83,6 +83,7 @@ class ForkPlugin implements Plugin<Project> {
                 ignoreFailures = config.ignoreFailures
                 excludedAnnotation = config.excludedAnnotation
                 forkIntegrationTestRunType = config.forkIntegrationTestRunType
+                testInstrumentationRunnerArguments = variant.mergedFlavor.testInstrumentationRunnerArguments
 
                 applicationApk = new File(baseVariantOutput.packageApplication.outputDirectory.path + "/" + baseVariantOutput.outputFileName)
 

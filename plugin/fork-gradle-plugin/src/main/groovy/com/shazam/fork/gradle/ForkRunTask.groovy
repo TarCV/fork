@@ -12,6 +12,7 @@
  */
 package com.shazam.fork.gradle
 
+import com.android.annotations.NonNull
 import com.shazam.fork.Configuration
 import com.shazam.fork.Fork
 import com.shazam.fork.ForkConfiguration
@@ -80,11 +81,15 @@ class ForkRunTask extends DefaultTask implements VerificationTask {
 
     ForkConfiguration.ForkIntegrationTestRunType forkIntegrationTestRunType
 
+    @NonNull
+    Map<String, String> testInstrumentationRunnerArguments
+
     @TaskAction
     void runFork() {
         LOG.info("Run instrumentation tests $instrumentationApk for app $applicationApk")
         LOG.debug("Output: $output")
         LOG.debug("Ignore failures: $ignoreFailures")
+        LOG.error("Test instrumentation runner arguments: $testInstrumentationRunnerArguments")
 
         Configuration configuration = configuration()
                 .withAndroidSdk(project.android.sdkDirectory)
@@ -106,6 +111,7 @@ class ForkRunTask extends DefaultTask implements VerificationTask {
                 .withAutoGrantPermissions(autoGrantPermissions)
                 .withExcludedAnnotation(excludedAnnotation)
                 .withForkIntegrationTestRunType(forkIntegrationTestRunType)
+                .withTestInstrumentationRunnerArguments(testInstrumentationRunnerArguments)
                 .build();
 
         boolean success = new Fork(configuration).run()

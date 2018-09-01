@@ -13,7 +13,6 @@
 package com.shazam.fork;
 
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
-import com.shazam.fork.runner.TestRunParameters;
 import com.shazam.fork.system.axmlparser.ApplicationInfo;
 import com.shazam.fork.system.axmlparser.ApplicationInfoFactory;
 import com.shazam.fork.system.axmlparser.InstrumentationInfo;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nonnull;
@@ -60,6 +60,7 @@ public class Configuration implements ForkConfiguration {
     private final boolean autoGrantPermissions;
     private final String excludedAnnotation;
     private final ForkIntegrationTestRunType forkIntegrationTestRunType;
+    private final Map<String, String> testInstrumentationRunnerArguments;
 
     private ApplicationInfo applicationInfo;
 
@@ -86,6 +87,7 @@ public class Configuration implements ForkConfiguration {
         autoGrantPermissions = builder.autoGrantPermissions;
         this.excludedAnnotation = builder.excludedAnnotation;
         this.forkIntegrationTestRunType = builder.forkIntegrationTestRunType;
+        this.testInstrumentationRunnerArguments = builder.testInstrumentationRunnerArguments;
         this.applicationInfo = builder.applicationInfo;
     }
 
@@ -241,6 +243,7 @@ public class Configuration implements ForkConfiguration {
         private String excludedAnnotation;
         private ApplicationInfo applicationInfo;
         private ForkIntegrationTestRunType forkIntegrationTestRunType = NONE;
+        private Map<String, String> testInstrumentationRunnerArguments;
 
         public static Builder configuration() {
             return new Builder();
@@ -341,6 +344,11 @@ public class Configuration implements ForkConfiguration {
             return this;
         }
 
+        public Builder withTestInstrumentationRunnerArguments(Map<String, String> testInstrumentationRunnerArguments) {
+            this.testInstrumentationRunnerArguments = testInstrumentationRunnerArguments;
+            return this;
+        }
+
         public Configuration build() {
             checkNotNull(androidSdk, "SDK is required.");
             checkArgument(androidSdk.exists(), "SDK directory does not exist.");
@@ -369,6 +377,8 @@ public class Configuration implements ForkConfiguration {
             logArgumentsBadInteractions();
             poolingStrategy = validatePoolingStrategy(poolingStrategy);
             applicationInfo = ApplicationInfoFactory.parseFromFile(applicationApk);
+            testInstrumentationRunnerArguments = assignValueOrDefaultIfNull(testInstrumentationRunnerArguments,
+                    Collections.emptyMap());
             return new Configuration(this);
         }
 
