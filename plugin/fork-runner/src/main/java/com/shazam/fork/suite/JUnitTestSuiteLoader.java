@@ -114,7 +114,8 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
 
                                             Collection<ITestRunListener> testRunListeners = new ArrayList<>();
                                             testRunListeners.add(testCollector);
-                                            if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS) {
+                                            if (configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS
+                                                    || configuration.getForkIntegrationTestRunType() == ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN) {
                                                 testRunListeners.add(new RecordingTestRunListener(device, true));
                                             }
 

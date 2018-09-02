@@ -62,7 +62,8 @@ public class TestRunListenersFactory {
                 getScreenTraceTestRunListener(fileManager, pool, device),
                 buildRetryListener(testCase, device, pool, progressReporter, testCaseEventQueue),
                 getCoverageTestRunListener(configuration, device, fileManager, pool, testCase));
-        if (forkIntegrationTestRunType == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS) {
+        if (forkIntegrationTestRunType == ForkConfiguration.ForkIntegrationTestRunType.RECORD_LISTENER_EVENTS
+                || forkIntegrationTestRunType == ForkConfiguration.ForkIntegrationTestRunType.STUB_PARALLEL_TESTRUN) {
             ArrayList<ITestRunListener> testListeners = new ArrayList<>(normalListeners);
             testListeners.add(new RecordingTestRunListener(device, false));
             return Collections.unmodifiableList(testListeners);
