@@ -14,10 +14,14 @@ import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Devices;
 import com.shazam.fork.system.adb.Adb;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import static com.android.ddmlib.IDevice.MNT_EXTERNAL_STORAGE;
 import static com.shazam.fork.model.Device.Builder.aDevice;
 import static com.shazam.fork.model.Devices.Builder.devices;
 
@@ -86,6 +90,8 @@ public class DeviceLoader {
                 .withApiLevel(device.getProperty("ro.build.version.sdk"))
                 .withDeviceInterface(device)
                 .withTabletCharacteristic(device.getProperty("ro.build.characteristics"))
-                .withDisplayGeometry(deviceGeometryRetriever.detectGeometry(device)).build();
+                .withDisplayGeometry(deviceGeometryRetriever.detectGeometry(device))
+                .withExternalStoragePath(device.getMountPoint(MNT_EXTERNAL_STORAGE))
+                .build();
     }
 }

@@ -29,6 +29,7 @@ public class Device {
 	private final boolean isTablet;
 	private final DisplayGeometry geometry;
     private final Diagnostics diagnostics;
+	private final String externalStoragePath;
 
 	public String getSerial() {
 		return serial;
@@ -71,6 +72,10 @@ public class Device {
         return diagnostics;
     }
 
+	public String getExternalStoragePath() {
+			return externalStoragePath;
+	}
+
     public static class Builder {
         private String serial = "Unspecified serial";
         private String manufacturer = "Unspecified manufacturer";
@@ -79,8 +84,9 @@ public class Device {
 		private IDevice deviceInterface;
 		private boolean isTablet = false;
 		private DisplayGeometry geometry;
+		private String externalStoragePath;
 
-        public static Builder aDevice() {
+		public static Builder aDevice() {
 			return new Builder();
 		}
 
@@ -132,10 +138,15 @@ public class Device {
 			return this;
 		}
 
+		public Builder withExternalStoragePath(String externalStoragePath) {
+			this.externalStoragePath = externalStoragePath;
+			return this;
+		}
+
 		public Device build() {
 			return new Device(this);
 		}
-	}
+    }
 
 	private Device(Builder builder) {
 		serial = builder.serial;
@@ -146,5 +157,6 @@ public class Device {
 		isTablet = builder.isTablet;
 		geometry = builder.geometry;
         diagnostics = Diagnostics.computeDiagnostics(deviceInterface, apiLevel);
+		externalStoragePath = builder.externalStoragePath;
 	}
 }

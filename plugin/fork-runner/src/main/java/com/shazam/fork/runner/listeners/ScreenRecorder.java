@@ -10,8 +10,15 @@
 
 package com.shazam.fork.runner.listeners;
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
+import com.android.ddmlib.ScreenRecorderOptions;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.SyncException;
+import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.shazam.fork.model.Device;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +26,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-import static com.shazam.fork.utils.Utils.millisSinceNanoTime;
 import static com.shazam.fork.system.io.RemoteFileManager.remoteVideoForTest;
 import static com.shazam.fork.system.io.RemoteFileManager.removeRemotePath;
+import static com.shazam.fork.utils.Utils.millisSinceNanoTime;
 import static java.lang.System.nanoTime;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -40,11 +47,11 @@ class ScreenRecorder implements Runnable {
     private final ScreenRecorderStopper screenRecorderStopper;
 
     public ScreenRecorder(TestIdentifier test, ScreenRecorderStopper screenRecorderStopper, File localVideoFile,
-                          IDevice deviceInterface) {
-        remoteFilePath = remoteVideoForTest(test);
+                          Device device) {
+        remoteFilePath = remoteVideoForTest(device, test);
         this.screenRecorderStopper = screenRecorderStopper;
         this.localVideoFile = localVideoFile;
-        this.deviceInterface = deviceInterface;
+        this.deviceInterface = device.getDeviceInterface();
     }
 
     @Override

@@ -12,9 +12,15 @@
  */
 package com.shazam.fork.runner;
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.DdmPreferences;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.shazam.fork.model.Device;
-import com.shazam.fork.model.*;
+import com.shazam.fork.model.Pool;
+import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.system.adb.Installer;
 
 import org.slf4j.Logger;
@@ -24,7 +30,9 @@ import java.io.IOException;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
-import static com.shazam.fork.system.io.RemoteFileManager.*;
+import static com.shazam.fork.system.io.RemoteFileManager.createCoverageDirectory;
+import static com.shazam.fork.system.io.RemoteFileManager.createRemoteDirectory;
+import static com.shazam.fork.system.io.RemoteFileManager.removeRemoteDirectory;
 
 public class DeviceTestRunner implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(DeviceTestRunner.class);
@@ -60,9 +68,9 @@ public class DeviceTestRunner implements Runnable {
             DdmPreferences.setTimeOut(30000);
             installer.prepareInstallation(deviceInterface);
             // For when previous run crashed/disconnected and left files behind
-            removeRemoteDirectory(deviceInterface);
-            createRemoteDirectory(deviceInterface);
-            createCoverageDirectory(deviceInterface);
+            removeRemoteDirectory(device);
+            createRemoteDirectory(device);
+            createCoverageDirectory(device);
             clearLogcat(deviceInterface);
 
             TestCaseEvent testCaseEvent;

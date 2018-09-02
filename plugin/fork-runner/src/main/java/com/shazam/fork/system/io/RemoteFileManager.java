@@ -18,6 +18,7 @@ import com.android.ddmlib.NullOutputReceiver;
 import com.android.ddmlib.ShellCommandUnresponsiveException;
 import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.shazam.fork.model.Device;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,31 +31,39 @@ import static com.shazam.fork.utils.DdmsUtils.escapeArgumentForCommandLine;
 public class RemoteFileManager {
 
     private static final Logger logger = LoggerFactory.getLogger(RemoteFileManager.class);
-    private static final String FORK_DIRECTORY = "/sdcard/fork";
     private static final NullOutputReceiver NO_OP_RECEIVER = new NullOutputReceiver();
-    private static final String COVERAGE_DIRECTORY = FORK_DIRECTORY + "/coverage";
 
     private RemoteFileManager() {}
+
+    private static String getForkDirectory(Device device) {
+        return device.getExternalStoragePath() + "/fork";
+    }
+
+    private static String getCoverageDirectory(Device device) {
+        return getForkDirectory(device) + "/coverage";
+    }
 
     public static void removeRemotePath(IDevice device, String remotePath) {
         executeCommand(device, "rm " + remotePath, "Could not delete remote file(s): " + remotePath);
     }
 
-    public static void createCoverageDirectory(IDevice device) {
-        executeCommand(device, "mkdir " + COVERAGE_DIRECTORY,
-                       "Could not create remote directory: " + COVERAGE_DIRECTORY);
+    public static void createCoverageDirectory(Device device) {
+        executeCommand(device.getDeviceInterface(), "mkdir " + getCoverageDirectory(device),
+                       "Could not create remote directory: " + getCoverageDirectory(device));
     }
 
-    public static String getCoverageFileName(TestIdentifier testIdentifier) {
-        return COVERAGE_DIRECTORY + "/" +testIdentifier.toString() + ".ec";
+    public static String getCoverageFileName(Device device, TestIdentifier testIdentifier) {
+        return getCoverageDirectory(device) + "/" +testIdentifier.toString() + ".ec";
     }
 
-    public static void createRemoteDirectory(IDevice device) {
-        executeCommand(device, "mkdir " + FORK_DIRECTORY, "Could not create remote directory: " + FORK_DIRECTORY);
+    public static void createRemoteDirectory(Device device) {
+        String forkDirectory = getForkDirectory(device);
+        executeCommand(device.getDeviceInterface(), "mkdir " + forkDirectory, "Could not create remote directory: " + forkDirectory);
     }
 
-    public static void removeRemoteDirectory(IDevice device) {
-        executeCommand(device, "rm -r " + FORK_DIRECTORY, "Could not delete remote directory: " + FORK_DIRECTORY);
+    public static void removeRemoteDirectory(Device device) {
+        String forkDirectory = getForkDirectory(device);
+        executeCommand(device.getDeviceInterface(), "rm -r " + forkDirectory, "Could not delete remote directory: " + forkDirectory);
     }
 
     private static void executeCommand(IDevice device, String command, String errorMessage) {
@@ -65,12 +74,13 @@ public class RemoteFileManager {
         }
     }
 
-    public static String remoteVideoForTest(TestIdentifier test) {
-        return escapeArgumentForCommandLine(remoteFileForTest(videoFileName(test)));
+    public static String remoteVideoForTest(Device device, TestIdentifier test) {
+        String path = remoteFileForTest(device, videoFileName(test));
+        return escapeArgumentForCommandLine(path);
     }
 
-    private static String remoteFileForTest(String filename) {
-        return FORK_DIRECTORY + "/" + filename;
+    private static String remoteFileForTest(Device device, String filename) {
+        return getForkDirectory(device) + "/" + filename;
     }
 
     private static String videoFileName(TestIdentifier test) {

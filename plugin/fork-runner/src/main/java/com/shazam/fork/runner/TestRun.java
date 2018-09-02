@@ -75,7 +75,7 @@ class TestRun {
 
         if (testRunParameters.isCoverageEnabled()) {
             runner.setCoverage(true);
-            runner.addInstrumentationArg("coverageFile", RemoteFileManager.getCoverageFileName(new TestIdentifier(testClassName, testMethodName)));
+            runner.addInstrumentationArg("coverageFile", RemoteFileManager.getCoverageFileName(testRunParameters.getDevice(), new TestIdentifier(testClassName, testMethodName)));
         }
 		String excludedAnnotation = testRunParameters.getExcludedAnnotation();
 		if (!Strings.isNullOrEmpty(excludedAnnotation)) {

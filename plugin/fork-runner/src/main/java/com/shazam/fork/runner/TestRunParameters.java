@@ -14,6 +14,7 @@ package com.shazam.fork.runner;
 
 import com.android.ddmlib.IDevice;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
+import com.shazam.fork.model.Device;
 import com.shazam.fork.model.TestCaseEvent;
 
 import javax.annotation.Nullable;
@@ -25,7 +26,7 @@ public class TestRunParameters {
 	private final boolean isCoverageEnabled;
 	private final IRemoteAndroidTestRunner.TestSize testSize;
 	private final int testOutputTimeout;
-	private final IDevice deviceInterface;
+	private final Device device;
 	private final String excludedAnnotation;
 	private final String applicationPackage;
 
@@ -50,8 +51,12 @@ public class TestRunParameters {
 		return testOutputTimeout;
 	}
 
+	public Device getDevice() {
+		return device;
+	}
+
 	public IDevice getDeviceInterface() {
-		return deviceInterface;
+		return device.getDeviceInterface();
 	}
 
 	public boolean isCoverageEnabled(){
@@ -72,7 +77,7 @@ public class TestRunParameters {
 		private String testRunner;
 		private boolean isCoverageEnabled;
 		private IRemoteAndroidTestRunner.TestSize testSize;
-		private IDevice deviceInterface;
+		private Device device;
 		private int testOutputTimeout;
 		private String excludedAnnotation;
 		private String applicationPackage;
@@ -106,8 +111,8 @@ public class TestRunParameters {
 			return this;
 		}
 
-		public Builder withDeviceInterface(IDevice deviceInterface) {
-			this.deviceInterface = deviceInterface;
+		public Builder withDevice(Device device) {
+			this.device = device;
 			return this;
 		}
 
@@ -137,7 +142,7 @@ public class TestRunParameters {
 		testRunner = builder.testRunner;
 		testSize = builder.testSize;
 		testOutputTimeout = builder.testOutputTimeout;
-		deviceInterface = builder.deviceInterface;
+		device = builder.device;
 		isCoverageEnabled = builder.isCoverageEnabled;
 		this.excludedAnnotation = builder.excludedAnnotation;
 		this.applicationPackage = builder.applicationPackage;
