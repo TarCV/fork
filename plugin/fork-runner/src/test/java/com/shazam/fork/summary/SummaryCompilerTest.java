@@ -5,6 +5,7 @@ import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+import com.shazam.fork.model.TestEventQueueImpl;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -99,7 +100,7 @@ public class SummaryCompilerTest {
     public void compilesSummaryWithCompletedTests() {
         fakeDeviceTestFilesRetriever.thatReturns(testResults);
 
-        Summary summary = summaryCompiler.compileSummary(devicePools, testCaseEvents);
+        Summary summary = summaryCompiler.compileSummary(devicePools, new TestEventQueueImpl(testCaseEvents));
 
         assertThat(summary.getPoolSummaries().get(0).getTestResults(), hasItems(
                 firstCompletedTest, secondCompletedTest));
@@ -109,7 +110,7 @@ public class SummaryCompilerTest {
     public void compilesSummaryWithIgnoredTests() {
         fakeDeviceTestFilesRetriever.thatReturns(testResults);
 
-        Summary summary = summaryCompiler.compileSummary(devicePools, testCaseEvents);
+        Summary summary = summaryCompiler.compileSummary(devicePools, new TestEventQueueImpl(testCaseEvents));
 
         assertThat(summary.getIgnoredTests(), hasSize(1));
         assertThat(summary.getIgnoredTests(), contains("com.example.IgnoredClassTest:doesJobProperly"));
@@ -119,7 +120,7 @@ public class SummaryCompilerTest {
     public void compilesSummaryWithFailedTests() {
         fakeDeviceTestFilesRetriever.thatReturns(testResults);
 
-        Summary summary = summaryCompiler.compileSummary(devicePools, testCaseEvents);
+        Summary summary = summaryCompiler.compileSummary(devicePools, new TestEventQueueImpl(testCaseEvents));
 
         assertThat(summary.getFailedTests(), hasSize(1));
         assertThat(summary.getFailedTests(),
@@ -130,7 +131,7 @@ public class SummaryCompilerTest {
     public void compilesSummaryWithFatalCrashedTestsIfTheyAreNotFoundInPassedOrFailedOrIgnored() {
         fakeDeviceTestFilesRetriever.thatReturns(testResults);
 
-        Summary summary = summaryCompiler.compileSummary(devicePools, testCaseEvents);
+        Summary summary = summaryCompiler.compileSummary(devicePools, new TestEventQueueImpl(testCaseEvents));
 
         assertThat(summary.getFatalCrashedTests(), hasSize(1));
         assertThat(summary.getFatalCrashedTests(),

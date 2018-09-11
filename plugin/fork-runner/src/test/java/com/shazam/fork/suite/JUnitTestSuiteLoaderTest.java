@@ -15,12 +15,7 @@ import com.shazam.fork.model.Device;
 import com.shazam.fork.model.LimitedTestCaseEvent;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.model.TestEventQueue;
-
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.FeatureMatcher;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
+import org.hamcrest.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -32,10 +27,7 @@ import java.util.stream.Stream;
 
 import static com.shazam.fork.model.Device.Builder.aDevice;
 import static java.util.Collections.singleton;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasProperty;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.AllOf.allOf;
 
 public class JUnitTestSuiteLoaderTest {
@@ -51,9 +43,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class2", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result, containsInAnyOrder(
+        Assert.assertThat(result.toCollection(), containsInAnyOrder(
                 allOf(
                         testCase("class1", "test1"),
                         supportingDevices(equalTo(singleton(device1)))
@@ -80,9 +72,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class", "test", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result, contains(
+        Assert.assertThat(result.toCollection(), contains(
                 allOf(
                         testCase("class", "test"),
                         supportingDevices(equalTo(setOf(device1, device2)))
@@ -103,9 +95,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class22", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader, remoteAndroidTestRunnerFactory()).loadTestSuite();
+        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result, containsInAnyOrder(
+        Assert.assertThat(result.toCollection(), containsInAnyOrder(
                 allOf(
                         testCase("class1", "test1"),
                         supportingDevices(equalTo(setOf(device1, device2)))
