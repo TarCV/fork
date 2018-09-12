@@ -14,6 +14,7 @@ package com.shazam.fork.suite;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.ForkConfiguration;
+import com.shazam.fork.model.LimitedTestCaseEvent;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.pooling.NoDevicesForPoolException;
@@ -24,17 +25,13 @@ import com.shazam.fork.runner.PoolTestRunnerFactory;
 import com.shazam.fork.runner.ProgressReporter;
 import com.shazam.fork.runner.listeners.TestRunListenersFactory;
 import com.shazam.fork.system.adb.Installer;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.shazam.fork.Utils.namedExecutor;
@@ -80,8 +77,14 @@ public class DeviceTestPairsLoaderImpl implements DeviceTestPairsLoader {
             ProgressReporter progressReporter = new TestListingProgressTracker();
             progressReporter.start();
             for (Pool pool : pools) {
+                List<LimitedTestCaseEvent> stubList = pool.getDevices().stream()
+                        .map(device -> new LimitedTestCaseEvent(
+                                new TestIdentifier("", "Listing testcases"),
+                                Collections.singleton(device)
+                        ))
+                        .collect(Collectors.toList());
                 Runnable poolTestRunner = poolTestRunnerFactory.createPoolTestRunner(pool,
-                        new OneDummyTestPerDeviceQueue(pool.size()),
+                        stubList,
                         poolCountDownLatch, progressReporter);
                 poolExecutor.execute(poolTestRunner);
             }

@@ -14,6 +14,8 @@ import com.android.ddmlib.*
 import com.android.ddmlib.IDevice.Feature.SCREEN_RECORD
 import com.android.ddmlib.log.LogReceiver
 import com.android.sdklib.AndroidVersion
+import com.shazam.fork.model.Device
+import com.shazam.fork.model.DisplayGeometry
 import java.io.File
 import java.io.FileWriter
 import java.io.IOException
@@ -31,6 +33,17 @@ class StubDevice(
         private val testCommandDelay: Long
 ) : IDevice {
     val deviceLogFile = File("${serial}_adb.log")
+
+    fun asDevice(): Device {
+        return Device.Builder()
+                .withApiLevel(api.toString())
+                .withDisplayGeometry(DisplayGeometry(640))
+                .withManufacturer(manufacturer)
+                .withModel(model)
+                .withSerial(serial)
+                .withDeviceInterface(this)
+                .build()
+    }
 
     override fun startScreenRecorder(remoteFilePath: String, options: ScreenRecorderOptions, receiver: IShellOutputReceiver) {
         synchronized(this) {

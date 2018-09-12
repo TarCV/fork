@@ -14,7 +14,6 @@ import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.LimitedTestCaseEvent;
 import com.shazam.fork.model.TestCaseEvent;
-import com.shazam.fork.model.TestEventQueue;
 import org.hamcrest.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,9 +42,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class2", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        Collection<TestCaseEvent> result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result.toCollection(), containsInAnyOrder(
+        Assert.assertThat(result, containsInAnyOrder(
                 allOf(
                         testCase("class1", "test1"),
                         supportingDevices(equalTo(singleton(device1)))
@@ -72,9 +71,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class", "test", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        Collection<TestCaseEvent> result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result.toCollection(), contains(
+        Assert.assertThat(result, contains(
                 allOf(
                         testCase("class", "test"),
                         supportingDevices(equalTo(setOf(device1, device2)))
@@ -95,9 +94,9 @@ public class JUnitTestSuiteLoaderTest {
                 testCaseDevice("class22", "test2", device2)
         );
 
-        TestEventQueue result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
+        Collection<TestCaseEvent> result = new JUnitTestSuiteLoader(pairsLoader).loadTestSuite();
 
-        Assert.assertThat(result.toCollection(), containsInAnyOrder(
+        Assert.assertThat(result, containsInAnyOrder(
                 allOf(
                         testCase("class1", "test1"),
                         supportingDevices(equalTo(setOf(device1, device2)))

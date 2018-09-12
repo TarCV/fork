@@ -12,6 +12,7 @@ package com.shazam.chimprunner.injector.system;
 
 import com.shazam.chimprunner.Configuration;
 import com.shazam.fork.system.adb.Installer;
+import com.shazam.fork.system.adb.InstallerImpl;
 
 import static com.shazam.chimprunner.injector.ConfigurationInjector.configuration;
 
@@ -27,7 +28,7 @@ public class InstallerInjector {
         String applicationPackage = configuration.getApplicationPackage();
         String instrumentationPackage = configuration.getInstrumentationPackage();
 
-        return new Installer(applicationPackage, instrumentationPackage, configuration.getApplicationApk(),
+        return new InstallerImpl(applicationPackage, instrumentationPackage, configuration.getApplicationApk(),
                 configuration.getInstrumentationApk(), AUTO_GRANT_PERMISSIONS);
     }
 }

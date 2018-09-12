@@ -14,22 +14,14 @@ package com.shazam.fork.suite;
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.LimitedTestCaseEvent;
-import com.shazam.fork.model.TestEventQueue;
-import com.shazam.fork.model.TestEventQueueImpl;
-
+import com.shazam.fork.model.TestCaseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.mapping;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 public class JUnitTestSuiteLoader implements TestSuiteLoader {
     private final Logger logger = LoggerFactory.getLogger(JUnitTestSuiteLoader.class);
@@ -41,16 +33,16 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
     }
 
     @Override
-    public TestEventQueue loadTestSuite() throws NoTestCasesFoundException {
+    public Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException {
         Stream<DeviceTestPair> knownTestsPairs = deviceTestPairsLoader.askDevicesForTests();
-        List<LimitedTestCaseEvent> limitedTestCaseEvents = buildTestSlotList(knownTestsPairs);
+        List<TestCaseEvent> limitedTestCaseEvents = buildTestSlotList(knownTestsPairs);
         if (limitedTestCaseEvents.isEmpty()) {
             throw new NoTestCasesFoundException("No compatible tests cases were found");
         }
-        return new TestEventQueueImpl(limitedTestCaseEvents);
+        return limitedTestCaseEvents;
     }
 
-    private static List<LimitedTestCaseEvent> buildTestSlotList(Stream<DeviceTestPair> deviceTestPairStream) {
+    private static List<TestCaseEvent> buildTestSlotList(Stream<DeviceTestPair> deviceTestPairStream) {
         Map<TestIdentifier, Set<Device>> testDevicesMap = deviceTestPairStream.collect(groupingBy(
                 DeviceTestPair::getTestIdentifier,
                 mapping(DeviceTestPair::getDevice, toSet())));

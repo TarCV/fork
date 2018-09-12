@@ -14,6 +14,7 @@ package com.shazam.fork.injector.system;
 
 import com.shazam.fork.Configuration;
 import com.shazam.fork.system.adb.Installer;
+import com.shazam.fork.system.adb.InstallerImpl;
 
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 
@@ -26,7 +27,7 @@ public class InstallerInjector {
         String applicationPackage = configuration.getApplicationPackage();
         String instrumentationPackage = configuration.getInstrumentationPackage();
 
-        return new Installer(applicationPackage, instrumentationPackage, configuration.getApplicationApk(),
+        return new InstallerImpl(applicationPackage, instrumentationPackage, configuration.getApplicationApk(),
                 configuration.getInstrumentationApk(), configuration.isAutoGrantingPermissions());
     }
 }

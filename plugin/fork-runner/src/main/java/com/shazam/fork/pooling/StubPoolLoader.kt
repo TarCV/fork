@@ -1,11 +1,10 @@
 package com.shazam.fork.pooling
 
 import com.shazam.fork.model.Device
-import com.shazam.fork.model.DisplayGeometry
 import com.shazam.fork.model.Pool
 import com.shazam.fork.runner.functionalTestTestcaseDuration
 
-class StubPoolLoader() : PoolLoader {
+class StubPoolLoader : PoolLoader {
     override fun loadPools(): Collection<Pool> {
         synchronized(StubPoolLoader.Companion) {
             if (pools == null) {
@@ -33,12 +32,5 @@ private fun createStubDevice(serial: String, api: Int): Device {
     val model = "Emu-$api"
     val stubDevice = StubDevice(serial, manufacturer, model, serial, api, "",
             functionalTestTestcaseDuration)
-    return Device.Builder()
-            .withApiLevel(api.toString())
-            .withDisplayGeometry(DisplayGeometry(640))
-            .withManufacturer(manufacturer)
-            .withModel(model)
-            .withSerial(serial)
-            .withDeviceInterface(stubDevice)
-            .build()
+    return stubDevice.asDevice()
 }

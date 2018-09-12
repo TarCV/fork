@@ -17,7 +17,6 @@ import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
-import com.shazam.fork.model.TestEventQueue;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -43,7 +42,7 @@ public class SummaryCompiler {
         this.deviceTestFilesRetriever = deviceTestFilesRetriever;
     }
 
-    Summary compileSummary(Collection<Pool> pools, TestEventQueue testCasesQueue) {
+    Summary compileSummary(Collection<Pool> pools, Collection<TestCaseEvent> testCases) {
         Summary.Builder summaryBuilder = aSummary();
 
         Set<TestResult> testResults = Sets.newHashSet();
@@ -59,8 +58,6 @@ public class SummaryCompiler {
             summaryBuilder.addPoolSummary(poolSummary);
             addFailedOrFatalCrashedTests(testResultsForPool, summaryBuilder);
         }
-
-        Collection<TestCaseEvent> testCases = testCasesQueue.toCollection();
 
         Collection<TestResult> ignoredTestResults = getIgnoredTestResults(testCases);
         addIgnoredTests(ignoredTestResults, summaryBuilder);

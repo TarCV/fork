@@ -13,27 +13,15 @@ package com.shazam.fork.suite;
 
 import com.shazam.fork.io.DexFileExtractor;
 import com.shazam.fork.model.TestCaseEvent;
-import com.shazam.fork.model.TestEventQueue;
-import com.shazam.fork.model.TestEventQueueImpl;
-
-import org.jf.dexlib.AnnotationDirectoryItem;
-import org.jf.dexlib.AnnotationItem;
-import org.jf.dexlib.AnnotationSetItem;
-import org.jf.dexlib.ClassDefItem;
+import org.jf.dexlib.*;
 import org.jf.dexlib.EncodedValue.AnnotationEncodedSubValue;
 import org.jf.dexlib.EncodedValue.ArrayEncodedValue;
 import org.jf.dexlib.EncodedValue.EncodedValue;
 import org.jf.dexlib.EncodedValue.StringEncodedValue;
-import org.jf.dexlib.StringIdItem;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.util.*;
 
 import static com.shazam.fork.model.TestCaseEvent.newTestCase;
 import static java.lang.Math.min;
@@ -58,7 +46,7 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
     }
 
     @Override
-    public TestEventQueue loadTestSuite() throws NoTestCasesFoundException {
+    public Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException {
         List<TestCaseEvent> testCaseEvents = dexFileExtractor.getDexFiles(instrumentationApkFile).stream()
                 .map(dexFile -> dexFile.ClassDefsSection.getItems())
                 .flatMap(Collection::stream)
@@ -70,7 +58,7 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
         if (testCaseEvents.isEmpty()) {
             throw new NoTestCasesFoundException("No tests cases were found in the test APK: " + instrumentationApkFile.getAbsolutePath());
         }
-        return new TestEventQueueImpl(testCaseEvents);
+        return testCaseEvents;
     }
 
     @Nonnull

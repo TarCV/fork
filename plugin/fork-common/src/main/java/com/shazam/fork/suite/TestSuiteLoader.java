@@ -10,8 +10,10 @@
 
 package com.shazam.fork.suite;
 
-import com.shazam.fork.model.TestEventQueue;
+import com.shazam.fork.model.TestCaseEvent;
+
+import java.util.Collection;
 
 public interface TestSuiteLoader {
-    TestEventQueue loadTestSuite() throws NoTestCasesFoundException;
+    Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException;
 }
