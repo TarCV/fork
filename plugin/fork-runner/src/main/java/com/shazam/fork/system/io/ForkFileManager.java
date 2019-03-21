@@ -4,6 +4,7 @@ import com.android.ddmlib.testrunner.TestIdentifier;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
+
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -11,7 +12,12 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.shazam.fork.CommonDefaults.FORK_SUMMARY_FILENAME_FORMAT;
 import static com.shazam.fork.system.io.FileType.TEST;
@@ -98,8 +104,35 @@ public class ForkFileManager implements FileManager {
         return new File(directory.toFile(), filename);
     }
 
-    private String createFilenameForTest(TestIdentifier testIdentifier, FileType fileType) {
-        return String.format("%s.%s", testIdentifier.toString(), fileType.getSuffix());
+    @Override
+    public String createFilenameForTest(TestIdentifier testIdentifier, FileType fileType) {
+        String testName = testIdentifier.toString();
+
+        // Test identifier can contain absolutely any characters, so generate safe name out of it
+        // Dots are not safe because of '.', '..' and extensions
+        String safeChars = testName.replaceAll("[^A-Za-z0-9_]", "_");
+
+        // Always use hash to handle edge case of test name that differ only with char case
+        String hash;
+        try {
+            byte[] hashBytes = MessageDigest.getInstance("MD5")
+                    .digest(testName.getBytes(StandardCharsets.UTF_8));
+            hash = IntStream.range(0, hashBytes.length)
+                    .map(i -> {
+                        if (hashBytes[i] >= 0) {
+                            return hashBytes[i];
+                        } else {
+                            return 0x100 + hashBytes[i];
+                        }
+                    })
+                    .skip(hashBytes.length / 2) // avoid too long file names
+                    .mapToObj(b -> String.format("%02x", b))
+                    .collect(Collectors.joining());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Failed to generate safe file name");
+        }
+
+        return String.format("%s-%s.%s", safeChars, hash, fileType.getSuffix());
     }
 
     private String createFilenameForTest(TestIdentifier testIdentifier, FileType fileType, int sequenceNumber) {

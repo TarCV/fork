@@ -33,4 +33,6 @@ public interface FileManager {
     File[] getFiles(FileType fileType, Pool pool, Device device, TestIdentifier testIdentifier);
 
     File getFile(FileType fileType, String pool, String safeSerial, TestIdentifier testIdentifier);
+
+    String createFilenameForTest(TestIdentifier testIdentifier, FileType fileType);
 }
