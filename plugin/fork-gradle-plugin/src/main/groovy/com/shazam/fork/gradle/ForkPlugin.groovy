@@ -15,6 +15,7 @@ package com.shazam.fork.gradle
 import com.android.build.gradle.AppPlugin
 import com.android.build.gradle.BaseExtension
 import com.android.build.gradle.LibraryPlugin
+import com.android.build.gradle.api.ApkVariant
 import com.android.build.gradle.api.BaseVariantOutput
 import com.android.build.gradle.api.TestVariant
 import com.shazam.fork.ForkConfigurationExtension
@@ -56,7 +57,8 @@ class ForkPlugin implements Plugin<Project> {
 
         def forkTask = project.tasks.create("${TASK_PREFIX}${variant.name.capitalize()}", ForkRunTask)
 
-        variant.testedVariant.outputs.all { BaseVariantOutput baseVariantOutput ->
+        def testedVariant = (ApkVariant) variant.testedVariant
+        testedVariant.outputs.all { BaseVariantOutput baseVariantOutput ->
             checkTestedVariants(baseVariantOutput)
             forkTask.configure {
                 ForkConfigurationExtension config = project.fork
@@ -64,8 +66,7 @@ class ForkPlugin implements Plugin<Project> {
                 description = "Runs instrumentation tests on all the connected devices for '${variant.name}' variation and generates a report with screenshots"
                 group = JavaBasePlugin.VERIFICATION_GROUP
 
-                def firstOutput = variant.outputs.asList().first()
-                instrumentationApk = new File(firstOutput.packageApplication.outputDirectory.path + "/" + firstOutput.outputFileName)
+                instrumentationApk = variant.outputs[0].outputFile
 
                 title = config.title
                 subtitle = config.subtitle
@@ -84,7 +85,7 @@ class ForkPlugin implements Plugin<Project> {
                 excludedAnnotation = config.excludedAnnotation
                 forkIntegrationTestRunType = config.forkIntegrationTestRunType
 
-                applicationApk = new File(baseVariantOutput.packageApplication.outputDirectory.path + "/" + baseVariantOutput.outputFileName)
+                applicationApk = baseVariantOutput.outputFile
 
                 String baseOutputDir = config.baseOutputDir
                 File outputBase
@@ -95,7 +96,7 @@ class ForkPlugin implements Plugin<Project> {
                 }
                 output = new File(outputBase, variant.name)
 
-                dependsOn variant.testedVariant.assemble, variant.assemble
+                dependsOn testedVariant.assembleProvider.get(), variant.assembleProvider.get()
             }
             forkTask.outputs.upToDateWhen { false }
         }
