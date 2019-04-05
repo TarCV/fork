@@ -13,9 +13,9 @@
 package com.shazam.fork.summary;
 
 import com.android.ddmlib.logcat.LogCatMessage;
-import com.android.ddmlib.testrunner.TestIdentifier;
 import com.google.common.io.Resources;
 import com.shazam.fork.io.HtmlGenerator;
+import com.shazam.fork.system.io.FileManager;
 
 import org.lesscss.LessCompiler;
 
@@ -27,6 +27,7 @@ import static com.google.common.collect.Collections2.transform;
 import static com.shazam.fork.io.Files.copyResource;
 import static com.shazam.fork.summary.HtmlConverters.toHtmlLogCatMessages;
 import static com.shazam.fork.summary.HtmlConverters.toHtmlSummary;
+import static com.shazam.fork.system.io.FileType.HTML;
 import static org.apache.commons.io.FileUtils.writeStringToFile;
 
 public class HtmlSummaryPrinter implements SummaryPrinter {
@@ -52,10 +53,17 @@ public class HtmlSummaryPrinter implements SummaryPrinter {
 	private final File staticOutput;
 	private final LogCatRetriever retriever;
     private final HtmlGenerator htmlGenerator;
+	private final FileManager fileManager;
 
-    public HtmlSummaryPrinter(File rootOutput, LogCatRetriever retriever, HtmlGenerator htmlGenerator) {
+	public HtmlSummaryPrinter(
+    		File rootOutput,
+			LogCatRetriever retriever,
+			HtmlGenerator htmlGenerator,
+			FileManager fileManager
+	) {
 		this.retriever = retriever;
         this.htmlGenerator = htmlGenerator;
+        this.fileManager = fileManager;
         htmlOutput = new File(rootOutput, HTML_OUTPUT);
 		staticOutput = new File(htmlOutput, STATIC);
 	}
@@ -66,7 +74,7 @@ public class HtmlSummaryPrinter implements SummaryPrinter {
         htmlOutput.mkdirs();
 		copyAssets();
 		generateCssFromLess();
-		HtmlSummary htmlSummary = toHtmlSummary(summary);
+		HtmlSummary htmlSummary = toHtmlSummary(fileManager, summary);
         htmlGenerator.generateHtml("forkpages/index.html", htmlOutput, INDEX_FILENAME, htmlSummary);
         generatePoolHtml(htmlSummary);
 		generatePoolTestsHtml(htmlSummary);
@@ -116,16 +124,14 @@ public class HtmlSummaryPrinter implements SummaryPrinter {
             File poolTestsDir = new File(htmlOutput, "pools/" + pool.plainPoolName);
             poolTestsDir.mkdirs();
             for (HtmlTestResult testResult : pool.testResults) {
-                String fileName = testResult.plainClassName + "__" + testResult.plainMethodName + ".html";
-                addLogcats(testResult, pool);
-                htmlGenerator.generateHtml("forkpages/pooltest.html", poolTestsDir, fileName, testResult, pool);
+				addLogcats(testResult, pool);
+                htmlGenerator.generateHtml("forkpages/pooltest.html", poolTestsDir, testResult.fileNameForTest + HTML.getSuffix(), testResult, pool);
             }
         }
 	}
 
     private void addLogcats(HtmlTestResult testResult, HtmlPoolSummary pool) {
-        TestIdentifier testIdentifier = new TestIdentifier(testResult.plainClassName, testResult.plainMethodName);
-        List<LogCatMessage> logCatMessages = retriever.retrieveLogCat(pool.plainPoolName, testResult.deviceSafeSerial, testIdentifier);
+		List<LogCatMessage> logCatMessages = retriever.retrieveLogCat(pool.plainPoolName, testResult.deviceSafeSerial, testResult.testIdentifier);
         testResult.logcatMessages = transform(logCatMessages, toHtmlLogCatMessages());
     }
 }

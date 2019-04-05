@@ -8,6 +8,12 @@ public enum FileType {
     ANIMATION ("animation", "gif"),
     SCREENRECORD ("screenrecord", "mp4"),
     COVERAGE ("coverage", "ec"),
+    HTML("html", "html"),
+
+    /**
+     * Generates filename like `filename.` (with the dot in the end)
+     */
+    DOT_WITHOUT_EXTENSION("", "")
     ;
 
     private final String directory;

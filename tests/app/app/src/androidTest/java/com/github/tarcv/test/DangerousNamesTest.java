@@ -42,6 +42,8 @@ public class DangerousNamesTest {
         return new Object[] {
                 "$THIS_IS_NOT_A_VAR",
                 "       1       ",
+                "#######",
+                "!!!!!!!",
                 "'''''''",
                 "\"\"\"\"\"\"\"\"",
                 "()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`()$(echo)`echo`" +

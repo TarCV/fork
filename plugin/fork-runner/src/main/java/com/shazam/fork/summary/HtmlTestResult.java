@@ -12,6 +12,8 @@
  */
 package com.shazam.fork.summary;
 
+import com.android.ddmlib.testrunner.TestIdentifier;
+
 import java.util.Collection;
 
 /**
@@ -23,9 +25,9 @@ public class HtmlTestResult {
 	public String prettyMethodName;
 	public String deviceSerial;
 	public String deviceSafeSerial;
-	public String plainMethodName;
 	public String deviceModelDespaced;
-	public String plainClassName;
+	public TestIdentifier testIdentifier;
+	public String fileNameForTest;
 	public String poolName;
 	public Collection<HtmlLogCatMessage> logcatMessages;
 	public String timeTaken;
