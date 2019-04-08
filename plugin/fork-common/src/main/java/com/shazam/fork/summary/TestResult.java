@@ -20,10 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.shazam.fork.summary.ResultStatus.ERROR;
-import static com.shazam.fork.summary.ResultStatus.FAIL;
-import static com.shazam.fork.summary.ResultStatus.IGNORED;
-import static com.shazam.fork.summary.ResultStatus.PASS;
+import static com.shazam.fork.summary.ResultStatus.*;
 import static java.lang.String.format;
 import static java.util.Locale.ENGLISH;
 import static java.util.Objects.hash;
@@ -68,6 +65,10 @@ public class TestResult {
             result = Integer.parseInt(testMetrics.get(SUMMARY_KEY_TOTAL_FAILURE_COUNT));
         }
         return result;
+    }
+
+    public Map<String, String> getMetrics() {
+        return new HashMap<>(testMetrics);
     }
 
     @Nonnull
@@ -136,6 +137,8 @@ public class TestResult {
             return new Builder();
         }
 
+        public Builder() {}
+
         public Builder withDevice(Device device) {
             this.device = device;
             return this;
@@ -183,6 +186,17 @@ public class TestResult {
 
         public TestResult build() {
             return new TestResult(this);
+        }
+
+        public Builder(TestResult testResult) {
+            device = testResult.device;
+            timeTaken = testResult.timeTaken;
+            testClass = testResult.testClass;
+            testMethod = testResult.testMethod;
+            errorTrace = testResult.errorTrace;
+            failureTrace = testResult.failureTrace;
+            testMetrics = testResult.testMetrics;
+            isIgnored = testResult.isIgnored;
         }
 
     }
