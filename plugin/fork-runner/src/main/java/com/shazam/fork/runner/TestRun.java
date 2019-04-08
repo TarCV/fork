@@ -9,11 +9,7 @@
  */
 package com.shazam.fork.runner;
 
-import com.android.ddmlib.AdbCommandRejectedException;
-import com.android.ddmlib.IDevice;
-import com.android.ddmlib.NullOutputReceiver;
-import com.android.ddmlib.ShellCommandUnresponsiveException;
-import com.android.ddmlib.TimeoutException;
+import com.android.ddmlib.*;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
@@ -22,7 +18,6 @@ import com.google.common.base.Strings;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.system.PermissionGrantingManager;
 import com.shazam.fork.system.io.RemoteFileManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +88,7 @@ class TestRun {
 		permissionGrantingManager.revokePermissions(applicationPackage, device, permissionsToRevoke);
 
 		try {
-			logger.error("Cmd: " + runner.getAmInstrumentCommand());
+			logger.info("Cmd: " + runner.getAmInstrumentCommand());
 			runner.run(testRunListeners);
 		} catch (ShellCommandUnresponsiveException | TimeoutException e) {
 			logger.warn("Test: " + testClassName + " got stuck. You can increase the timeout in settings if it's too strict");
