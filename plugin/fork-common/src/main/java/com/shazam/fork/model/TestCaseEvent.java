@@ -2,6 +2,7 @@ package com.shazam.fork.model;
 
 import com.android.ddmlib.testrunner.TestIdentifier;
 import com.google.common.base.Objects;
+import com.google.gson.JsonObject;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -28,7 +29,7 @@ public class TestCaseEvent {
         this.properties = properties;
     }
 
-    public static TestCaseEvent newTestCase(String testMethod, String testClass, boolean isIgnored, List<String> permissionsToRevoke, Map<String, String> properties) {
+    public static TestCaseEvent newTestCase(String testMethod, String testClass, boolean isIgnored, List<String> permissionsToRevoke, Map<String, String> properties, JsonObject info) {
         return new TestCaseEvent(testMethod, testClass, isIgnored, permissionsToRevoke, properties);
     }
 

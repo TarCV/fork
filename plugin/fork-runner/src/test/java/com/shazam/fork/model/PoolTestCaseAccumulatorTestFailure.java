@@ -1,5 +1,6 @@
 package com.shazam.fork.model;
 
+import com.google.gson.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,8 +30,8 @@ public class PoolTestCaseAccumulatorTestFailure {
             .addDevice(ANOTHER_DEVICE)
             .build();
     
-    private final TestCaseEvent A_TEST_CASE = newTestCase("a_method", "a_class", false, emptyList(), emptyMap());
-    private final TestCaseEvent ANOTHER_TEST_CASE = newTestCase("another_method", "a_class", false, emptyList(), emptyMap());
+    private final TestCaseEvent A_TEST_CASE = newTestCase("a_method", "a_class", false, emptyList(), emptyMap(), new JsonObject());
+    private final TestCaseEvent ANOTHER_TEST_CASE = newTestCase("another_method", "a_class", false, emptyList(), emptyMap(), new JsonObject());
 
     PoolTestCaseFailureAccumulator subject;
 

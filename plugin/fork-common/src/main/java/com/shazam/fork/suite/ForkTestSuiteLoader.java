@@ -11,27 +11,18 @@
 
 package com.shazam.fork.suite;
 
+import com.google.gson.JsonObject;
 import com.shazam.fork.io.DexFileExtractor;
 import com.shazam.fork.model.TestCaseEvent;
-
-import org.jf.dexlib.AnnotationDirectoryItem;
-import org.jf.dexlib.AnnotationItem;
-import org.jf.dexlib.AnnotationSetItem;
-import org.jf.dexlib.ClassDefItem;
+import org.jf.dexlib.*;
 import org.jf.dexlib.EncodedValue.AnnotationEncodedSubValue;
 import org.jf.dexlib.EncodedValue.ArrayEncodedValue;
 import org.jf.dexlib.EncodedValue.EncodedValue;
 import org.jf.dexlib.EncodedValue.StringEncodedValue;
-import org.jf.dexlib.StringIdItem;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import javax.annotation.Nonnull;
+import java.io.File;
+import java.util.*;
 
 import static com.shazam.fork.model.TestCaseEvent.newTestCase;
 import static java.lang.Math.min;
@@ -98,7 +89,7 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
         boolean ignored = isClassIgnored(annotationDirectoryItem) || isMethodIgnored(annotations);
         List<String> permissionsToRevoke = getPermissionsToRevoke(annotations);
         Map<String, String> properties = getTestProperties(annotations);
-        return newTestCase(testMethod, testClass, ignored, permissionsToRevoke, properties);
+        return newTestCase(testMethod, testClass, ignored, permissionsToRevoke, properties, new JsonObject());
     }
 
     private String getClassName(ClassDefItem classDefItem) {
@@ -126,14 +117,15 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
                 .filter(annotationItem -> TEST_PROPERTIES_ANNOTATION.equals(stringType(annotationItem)))
                 .map(AnnotationItem::getEncodedAnnotation)
                 .forEach(an -> {
-                    List<String> keys = getAnnotationProperty(an, "keys");
-                    List<String> values = getAnnotationProperty(an, "values");
-
-                    for (int i = 0; i < min(values.size(), keys.size()); i++) {
-                        properties.put(keys.get(i), values.get(i));
-                    }
+                    keyValueArraysToProperties(properties, getAnnotationProperty(an, "keys"), getAnnotationProperty(an, "values"));
                 });
         return properties;
+    }
+
+    public static void keyValueArraysToProperties(Map<String, String> properties, List<String> keys, List<String> values) {
+        for (int i = 0; i < min(values.size(), keys.size()); i++) {
+            properties.put(keys.get(i), values.get(i));
+        }
     }
 
     private List<String> getAnnotationProperty(AnnotationEncodedSubValue an, String propertyName) {

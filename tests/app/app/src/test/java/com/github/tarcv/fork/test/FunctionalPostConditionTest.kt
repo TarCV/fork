@@ -24,7 +24,7 @@ class FunctionalPostConditionTest {
             acc
         }
 
-        assert(simplifiedResults.size == 1+3+3+4+11) { "All tests should be executed" }
+        assert(simplifiedResults.size == 1+3+3+4+11+2) { "All tests should be executed" }
     }
 
     @Test

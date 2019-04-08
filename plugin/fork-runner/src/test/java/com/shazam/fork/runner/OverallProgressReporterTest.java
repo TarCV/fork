@@ -1,9 +1,9 @@
 package com.shazam.fork.runner;
 
+import com.google.gson.JsonObject;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
 import com.shazam.fork.model.TestCaseEvent;
-
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -28,7 +28,7 @@ public class OverallProgressReporterTest {
     private final Pool A_POOL = aDevicePool()
             .addDevice(A_DEVICE)
             .build();
-    private final TestCaseEvent A_TEST_CASE = newTestCase("aTestMethod", "aTestClass", false, emptyList(), emptyMap());
+    private final TestCaseEvent A_TEST_CASE = newTestCase("aTestMethod", "aTestClass", false, emptyList(), emptyMap(), new JsonObject());
 
     private OverallProgressReporter overallProgressReporter;
 

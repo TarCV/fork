@@ -1,6 +1,7 @@
 package com.shazam.fork.summary;
 
 import com.android.ddmlib.testrunner.TestIdentifier;
+import com.google.gson.JsonObject;
 import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
 import com.shazam.fork.model.Pool;
@@ -82,7 +83,7 @@ public class SummaryCompilerTest {
             newTestCase(new TestIdentifier("com.example.CompletedClassTest", "doesJobProperly")),
             newTestCase(new TestIdentifier("com.example.CompletedClassTest2", "doesJobProperly")),
             newTestCase("doesJobProperly", "com.example.FailedClassTest", false,
-                    emptyList(), testMetricsForFailedTest),
+                    emptyList(), testMetricsForFailedTest, new JsonObject()),
             newTestCase(new TestIdentifier("com.example.IgnoredClassTest", "doesJobProperly"), true),
             newTestCase(new TestIdentifier("com.example.SkippedClassTest", "doesJobProperly"))
     );

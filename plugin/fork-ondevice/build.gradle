@@ -20,7 +20,7 @@ android {
 
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 27
         versionCode 30401
         versionName VERSION_NAME
@@ -39,6 +39,6 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support.test:runner:1.0.2'
 }
