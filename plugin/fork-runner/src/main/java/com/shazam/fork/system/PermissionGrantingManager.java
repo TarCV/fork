@@ -56,7 +56,7 @@ public class PermissionGrantingManager {
     public void restorePermissions(@Nonnull String applicationPackage,
                                    @Nonnull IDevice device,
                                    @Nonnull List<String> permissionsToRestore) {
-        if (!permissionsToRestore.isEmpty() && configuration.isAutoGrantingPermissions()) {
+        if (!permissionsToRestore.isEmpty()) {
             List<String> permissionsToGrant = new ArrayList<>(permissionsToRestore.size());
 
             List<Permission> permissions = configuration.getApplicationInfo().getPermissions();

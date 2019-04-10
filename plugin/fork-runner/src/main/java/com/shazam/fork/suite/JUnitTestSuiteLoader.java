@@ -11,7 +11,11 @@ package com.shazam.fork.suite;
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.DdmPreferences;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.logcat.LogCatMessage;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
@@ -32,12 +36,19 @@ import com.shazam.fork.runner.IRemoteAndroidTestRunnerFactory;
 import com.shazam.fork.runner.listeners.CollectingLogCatTestRunListener;
 import com.shazam.fork.runner.listeners.RecordingTestRunListener;
 import com.shazam.fork.system.adb.Installer;
+
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
@@ -189,7 +200,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                 .map(testIdentifier -> {
                     JsonObject info = testInfos.get(testIdentifier);
                     if (info != null) {
-                        List<String> permissionsToRevoke = new ArrayList<>();
+                        List<String> permissionsToGrant = new ArrayList<>();
                         Map<String, String> properties = new HashMap<>();
 
                         JsonElement annotations = info.get("annotations");
@@ -198,9 +209,9 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                                 JsonObject annotation = annotationElement.getAsJsonObject();
                                 String annotationType = annotation.get("annotationType").getAsString();
                                 switch (annotationType) {
-                                    case "com.shazam.fork.RevokePermission":
+                                    case "com.shazam.fork.GrantPermission":
                                         annotation.getAsJsonArray("value")
-                                                .forEach(jsonElement -> permissionsToRevoke.add(jsonElement.getAsString()));
+                                                .forEach(jsonElement -> permissionsToGrant.add(jsonElement.getAsString()));
                                         break;
                                     case "com.shazam.fork.TestProperties":
                                         List<String> keys = toStringList(annotation.getAsJsonArray("keys"));
@@ -212,7 +223,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                         }
 
                         return TestCaseEvent.newTestCase(testIdentifier.getTestName(), testIdentifier.getClassName(),
-                                false, permissionsToRevoke, properties, info);
+                                false, permissionsToGrant, properties, info);
                     } else {
                         return TestCaseEvent.newTestCase(testIdentifier);
                     }

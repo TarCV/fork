@@ -14,15 +14,25 @@ package com.shazam.fork.suite;
 import com.google.gson.JsonObject;
 import com.shazam.fork.io.DexFileExtractor;
 import com.shazam.fork.model.TestCaseEvent;
-import org.jf.dexlib.*;
+
+import org.jf.dexlib.AnnotationDirectoryItem;
+import org.jf.dexlib.AnnotationItem;
+import org.jf.dexlib.AnnotationSetItem;
+import org.jf.dexlib.ClassDefItem;
 import org.jf.dexlib.EncodedValue.AnnotationEncodedSubValue;
 import org.jf.dexlib.EncodedValue.ArrayEncodedValue;
 import org.jf.dexlib.EncodedValue.EncodedValue;
 import org.jf.dexlib.EncodedValue.StringEncodedValue;
+import org.jf.dexlib.StringIdItem;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.util.*;
 
 import static com.shazam.fork.model.TestCaseEvent.newTestCase;
 import static java.lang.Math.min;
@@ -33,7 +43,7 @@ import static java.util.stream.Collectors.toList;
 public class ForkTestSuiteLoader implements TestSuiteLoader {
     private static final String TEST_ANNOTATION = "Lorg/junit/Test;";
     private static final String IGNORE_ANNOTATION = "Lorg/junit/Ignore;";
-    private static final String REVOKE_PERMISSION_ANNOTATION = "Lcom/shazam/fork/RevokePermission;";
+    private static final String GRANT_PERMISSION_ANNOTATION = "Lcom/shazam/fork/GrantPermission;";
     private static final String TEST_PROPERTIES_ANNOTATION = "Lcom/shazam/fork/TestProperties;";
 
     private final File instrumentationApkFile;
@@ -87,9 +97,9 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
         AnnotationItem[] annotations = method.annotationSet.getAnnotations();
         String testClass = getClassName(classDefItem);
         boolean ignored = isClassIgnored(annotationDirectoryItem) || isMethodIgnored(annotations);
-        List<String> permissionsToRevoke = getPermissionsToRevoke(annotations);
+        List<String> permissionsToGrant = getPermissionsToGrant(annotations);
         Map<String, String> properties = getTestProperties(annotations);
-        return newTestCase(testMethod, testClass, ignored, permissionsToRevoke, properties, new JsonObject());
+        return newTestCase(testMethod, testClass, ignored, permissionsToGrant, properties, new JsonObject());
     }
 
     private String getClassName(ClassDefItem classDefItem) {
@@ -101,9 +111,9 @@ public class ForkTestSuiteLoader implements TestSuiteLoader {
         return containsAnnotation(IGNORE_ANNOTATION, annotationItems);
     }
 
-    private List<String> getPermissionsToRevoke(AnnotationItem[] annotations) {
+    private List<String> getPermissionsToGrant(AnnotationItem[] annotations) {
         return stream(annotations)
-                .filter(annotationItem -> REVOKE_PERMISSION_ANNOTATION.equals(stringType(annotationItem)))
+                .filter(annotationItem -> GRANT_PERMISSION_ANNOTATION.equals(stringType(annotationItem)))
                 .map(annotationItem -> annotationItem.getEncodedAnnotation().values)
                 .flatMap(encodedValues -> stream(encodedValues)
                         .flatMap(encodedValue -> stream(((ArrayEncodedValue) encodedValue).values)

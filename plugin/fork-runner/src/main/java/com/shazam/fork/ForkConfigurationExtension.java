@@ -91,12 +91,6 @@ public class ForkConfigurationExtension {
     public PoolingStrategy poolingStrategy;
 
     /**
-     * Indicate that in Marshmallow+ all the required runtime permissions are granted automatically.
-     * Default is true.
-     */
-    public boolean autoGrantPermissions = true;
-
-    /**
      * Filter test run to tests without given annotation
      */
     public String excludedAnnotation;

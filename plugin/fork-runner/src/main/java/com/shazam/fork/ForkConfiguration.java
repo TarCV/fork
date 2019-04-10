@@ -3,11 +3,12 @@ package com.shazam.fork;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
 import com.shazam.fork.system.axmlparser.ApplicationInfo;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.util.Collection;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public interface ForkConfiguration {
     @Nonnull
@@ -60,8 +61,6 @@ public interface ForkConfiguration {
     boolean isCoverageEnabled();
 
     PoolingStrategy getPoolingStrategy();
-
-    boolean isAutoGrantingPermissions();
 
     String getExcludedAnnotation();
 

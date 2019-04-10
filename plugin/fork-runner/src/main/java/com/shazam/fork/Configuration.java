@@ -13,7 +13,6 @@
 package com.shazam.fork;
 
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
-import com.shazam.fork.runner.TestRunParameters;
 import com.shazam.fork.system.axmlparser.ApplicationInfo;
 import com.shazam.fork.system.axmlparser.ApplicationInfoFactory;
 import com.shazam.fork.system.axmlparser.InstrumentationInfo;
@@ -57,7 +56,6 @@ public class Configuration implements ForkConfiguration {
     private final int retryPerTestCaseQuota;
     private final boolean isCoverageEnabled;
     private final PoolingStrategy poolingStrategy;
-    private final boolean autoGrantPermissions;
     private final String excludedAnnotation;
     private final ForkIntegrationTestRunType forkIntegrationTestRunType;
 
@@ -83,7 +81,6 @@ public class Configuration implements ForkConfiguration {
         retryPerTestCaseQuota = builder.retryPerTestCaseQuota;
         isCoverageEnabled = builder.isCoverageEnabled;
         poolingStrategy = builder.poolingStrategy;
-        autoGrantPermissions = builder.autoGrantPermissions;
         this.excludedAnnotation = builder.excludedAnnotation;
         this.forkIntegrationTestRunType = builder.forkIntegrationTestRunType;
         this.applicationInfo = builder.applicationInfo;
@@ -198,11 +195,6 @@ public class Configuration implements ForkConfiguration {
     }
 
     @Override
-    public boolean isAutoGrantingPermissions() {
-        return autoGrantPermissions;
-    }
-
-    @Override
     public String getExcludedAnnotation() {
         return excludedAnnotation;
     }
@@ -237,7 +229,6 @@ public class Configuration implements ForkConfiguration {
         private int retryPerTestCaseQuota;
         private boolean isCoverageEnabled;
         private PoolingStrategy poolingStrategy;
-        private boolean autoGrantPermissions;
         private String excludedAnnotation;
         private ApplicationInfo applicationInfo;
         private ForkIntegrationTestRunType forkIntegrationTestRunType = NONE;
@@ -323,11 +314,6 @@ public class Configuration implements ForkConfiguration {
 
         public Builder withPoolingStrategy(@Nullable PoolingStrategy poolingStrategy) {
             this.poolingStrategy = poolingStrategy;
-            return this;
-        }
-
-        public Builder withAutoGrantPermissions(boolean autoGrantPermissions) {
-            this.autoGrantPermissions = autoGrantPermissions;
             return this;
         }
 

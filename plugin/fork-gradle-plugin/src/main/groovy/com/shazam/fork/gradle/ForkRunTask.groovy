@@ -74,8 +74,6 @@ class ForkRunTask extends DefaultTask implements VerificationTask {
 
     PoolingStrategy poolingStrategy
 
-    boolean autoGrantPermissions;
-
     String excludedAnnotation
 
     ForkConfiguration.ForkIntegrationTestRunType forkIntegrationTestRunType
@@ -103,7 +101,6 @@ class ForkRunTask extends DefaultTask implements VerificationTask {
                 .withRetryPerTestCaseQuota(retryPerTestCaseQuota)
                 .withCoverageEnabled(isCoverageEnabled)
                 .withPoolingStrategy(poolingStrategy)
-                .withAutoGrantPermissions(autoGrantPermissions)
                 .withExcludedAnnotation(excludedAnnotation)
                 .withForkIntegrationTestRunType(forkIntegrationTestRunType)
                 .build();

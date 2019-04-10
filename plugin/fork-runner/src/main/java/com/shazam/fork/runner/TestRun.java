@@ -9,7 +9,11 @@
  */
 package com.shazam.fork.runner;
 
-import com.android.ddmlib.*;
+import com.android.ddmlib.AdbCommandRejectedException;
+import com.android.ddmlib.IDevice;
+import com.android.ddmlib.NullOutputReceiver;
+import com.android.ddmlib.ShellCommandUnresponsiveException;
+import com.android.ddmlib.TimeoutException;
 import com.android.ddmlib.testrunner.IRemoteAndroidTestRunner;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
@@ -18,6 +22,7 @@ import com.google.common.base.Strings;
 import com.shazam.fork.model.TestCaseEvent;
 import com.shazam.fork.system.PermissionGrantingManager;
 import com.shazam.fork.system.io.RemoteFileManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,9 +88,9 @@ class TestRun {
 		clearPackageData(device, applicationPackage);
 		clearPackageData(device, testRunParameters.getTestPackage());
 
-		List<String> permissionsToRevoke = testRunParameters.getTest().getPermissionsToRevoke();
+		List<String> permissionsToGrant = testRunParameters.getTest().getPermissionsToGrant();
 
-		permissionGrantingManager.revokePermissions(applicationPackage, device, permissionsToRevoke);
+		permissionGrantingManager.restorePermissions(applicationPackage, device, permissionsToGrant);
 
 		try {
 			logger.info("Cmd: " + runner.getAmInstrumentCommand());
@@ -95,7 +100,7 @@ class TestRun {
 		} catch (AdbCommandRejectedException | IOException e) {
 			throw new RuntimeException(format("Error while running test %s %s", test.getTestClass(), test.getTestMethod()), e);
 		} finally {
-			permissionGrantingManager.restorePermissions(applicationPackage, device, permissionsToRevoke);
+			permissionGrantingManager.revokePermissions(applicationPackage, device, permissionsToGrant);
 		}
 
     }
