@@ -44,6 +44,8 @@ dependencies {
 fork {
     title = "Acceptance tests"
 
+    testPackage = "com.github.tarcv.test"
+
     totalAllowedRetryQuota = 4
     retryPerTestCaseQuota = 2
 
