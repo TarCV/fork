@@ -73,7 +73,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
         Pattern packagePrefixPattern = Pattern.compile("^[a-z_][a-z0-9_.]*\\.");
         Pattern testClassPattern = configuration().getTestClassPattern();
 
-        return askDevicesForTests().stream()
+        Collection<TestCaseEvent> result = askDevicesForTests().stream()
                 .filter(testCaseEvent ->
                 {
                     String fullClassName = testCaseEvent.getTestClass();
@@ -89,6 +89,11 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                     return testClassPattern.matcher(className).matches();
                 })
                 .collect(Collectors.toList());
+        if (result.isEmpty()) {
+            throw new NoTestCasesFoundException("No tests cases were found");
+        }
+
+        return result;
     }
 
     private Set<TestCaseEvent> askDevicesForTests() {
