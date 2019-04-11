@@ -10,8 +10,13 @@ import org.junit.runner.manipulation.Filter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AnnontationReadingFilter extends Filter {
+    private static final int MSG_LENGTH_LIMIT_WITHOUT_PREFIX = 4000 - 16;
+    private final AtomicInteger index = new AtomicInteger();
+    private final String objectId = String.format("%08x", System.identityHashCode(this));
+
     @Override
     public boolean shouldRun(Description description) {
         if (!description.isTest()) {
@@ -46,16 +51,12 @@ public class AnnontationReadingFilter extends Filter {
 
             info.put("annotations", annotationsInfo);
 
-            // Indentation MUST be enabled, so that it is sensibly split line by line
-            String message = info.toString(1);
-            boolean first = true;
-            for( String line : message.split("\n") ) {
-                if (first) {
-                    Log.i("Fork.TestInfo", line);
-                    first = false;
-                } else {
-                    Log.i("Fork.TestInfo", " " + line);
-                }
+            String message = info.toString() + ",";
+            int messageLength = message.length();
+            for (int i = 0; i < messageLength; i += MSG_LENGTH_LIMIT_WITHOUT_PREFIX) {
+                String linePrefix = objectId + "-" + String.format("%08x", index.getAndIncrement()) + ":";
+                int endIndex = Math.min(i + MSG_LENGTH_LIMIT_WITHOUT_PREFIX, messageLength);
+                Log.i("Fork.TestInfo", linePrefix + message.substring(i, endIndex));
             }
         } catch (JSONException e) {
             throw new RuntimeException(e);

@@ -11,19 +11,12 @@ package com.shazam.fork.suite;
  * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
  */
 
-import com.android.ddmlib.AdbCommandRejectedException;
-import com.android.ddmlib.DdmPreferences;
-import com.android.ddmlib.IDevice;
-import com.android.ddmlib.ShellCommandUnresponsiveException;
-import com.android.ddmlib.TimeoutException;
+import com.android.ddmlib.*;
 import com.android.ddmlib.logcat.LogCatMessage;
 import com.android.ddmlib.testrunner.ITestRunListener;
 import com.android.ddmlib.testrunner.RemoteAndroidTestRunner;
 import com.android.ddmlib.testrunner.TestIdentifier;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.ForkConfiguration;
 import com.shazam.fork.model.Device;
@@ -36,27 +29,22 @@ import com.shazam.fork.runner.IRemoteAndroidTestRunnerFactory;
 import com.shazam.fork.runner.listeners.CollectingLogCatTestRunListener;
 import com.shazam.fork.runner.listeners.RecordingTestRunListener;
 import com.shazam.fork.system.adb.Installer;
-
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.shazam.fork.Utils.namedExecutor;
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
@@ -79,8 +67,30 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
     @Override
     public Collection<TestCaseEvent> loadTestSuite() throws NoTestCasesFoundException {
         // 1. Ask instrumentation runner to provide list of testcases for us
-        Set<TestCaseEvent> knownTests = askDevicesForTests();
-        return new ArrayList<>(knownTests);
+        // 2. Apply filters we can apply without running them on devices
+
+        Pattern packagePrefixPattern = Pattern.compile("^[a-z_][a-z0-9_.]*\\.");
+        Pattern testClassPattern = configuration().getTestClassPattern();
+
+        return askDevicesForTests().stream()
+                /*.filter(testCaseEvent ->
+                {
+                    String fullClassName = testCaseEvent.getTestClass();
+
+                    // Not 100% reliable, but good as far as naming conventions are abode
+                    int packagePrefixLength = 0;
+                    Matcher matcher = packagePrefixPattern.matcher(fullClassName);
+                    if (matcher.lookingAt()) {
+                        packagePrefixLength = matcher.regionEnd();
+                    }
+                    String className = fullClassName.substring(packagePrefixLength);
+                    boolean matches = testClassPattern.matcher(className).matches();
+
+                    logger.info(String.format("Checking %s, matches: %s", className, matches));
+
+                    return matches;
+                })*/
+                .collect(Collectors.toList());
     }
 
     private Set<TestCaseEvent> askDevicesForTests() {
@@ -128,6 +138,8 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
 
                                             runner.addBooleanArg("log", true);
                                             runner.addInstrumentationArg("filter", "com.shazam.fork.ondevice.AnnontationReadingFilter");
+
+                                            remoteAndroidTestRunnerFactory.properlyAddInstrumentationArg(runner, "package", configuration.getTestPackage());
 
                                             Collection<ITestRunListener> testRunListeners = new ArrayList<>();
                                             testRunListeners.add(testCollector);
@@ -246,64 +258,82 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                 .collect(new TestInfoCatCollector());
     }
 
-    // TODO: implement testcases
-    private static class TestInfoCatCollector implements Collector<LogCatMessage, ArrayList<StringBuilder>, List<JsonObject>> {
+    static class TestInfoCatCollector implements Collector<LogCatMessage, ArrayList<MessageTriple>, List<JsonObject>> {
         private final static JsonParser jsonParser = new JsonParser();
         private final static Logger logger = LoggerFactory.getLogger(TestInfoCatCollector.class);
 
         @Override
-        public Supplier<ArrayList<StringBuilder>> supplier() {
+        public Supplier<ArrayList<MessageTriple>> supplier() {
             return ArrayList::new;
         }
 
         @Override
-        public BiConsumer<ArrayList<StringBuilder>, LogCatMessage> accumulator() {
-            return (strings, logCatMessage) -> {
-                String line = logCatMessage.getMessage();
-                if (!strings.isEmpty() && line.startsWith(" ")) {
-                    int lastIndex = strings.size() - 1;
-                    strings.set(lastIndex, strings.get(lastIndex).append(line));
-                } else {
-                    strings.add(new StringBuilder(line));
-                }
+        public BiConsumer<ArrayList<MessageTriple>, LogCatMessage> accumulator() {
+            return (triples, logCatMessage) -> {
+                String[] parts = logCatMessage.getMessage().split(":", 2);
+                String[] indexParts = parts[0].split("-", 2);
+                MessageTriple triple = new MessageTriple(indexParts[0], indexParts[1], parts[1]);
+                triples.add(triple);
             };
         }
 
         @Override
-        public BinaryOperator<ArrayList<StringBuilder>> combiner() {
-            return (lines1, lines2) -> {
-                List<StringBuilder> secondBlock = lines2;
-                if (!lines1.isEmpty() && !lines2.isEmpty()) {
-                    StringBuilder firstLineOfSecondBlock = secondBlock.get(0);
-                    if (firstLineOfSecondBlock.charAt(0) == ' ') {
-                        int lastIndex = lines1.size() - 1;
-                        lines1.get(lastIndex).append(firstLineOfSecondBlock);
-                        secondBlock = secondBlock.subList(1, secondBlock.size());
-                    }
-                }
-
-                ArrayList<StringBuilder> output = new ArrayList<>(lines1.size() + secondBlock.size());
-                output.addAll(lines1);
-                output.addAll(secondBlock);
-
+        public BinaryOperator<ArrayList<MessageTriple>> combiner() {
+            return (triples1, triples2) -> {
+                ArrayList<MessageTriple> output = new ArrayList<>(triples1.size() + triples2.size());
+                output.addAll(triples1);
+                output.addAll(triples2);
                 return output;
             };
         }
 
         @Override
-        public Function<ArrayList<StringBuilder>, List<JsonObject>> finisher() {
-            return lines -> lines.stream()
-                    .map(StringBuilder::toString)
-                    .map(string -> {
-                        logger.debug(string);
-                        return jsonParser.parse(string).getAsJsonObject();
-                    })
-                    .collect(Collectors.toList());
+        public Function<ArrayList<MessageTriple>, List<JsonObject>> finisher() {
+            return triples -> {
+                String joined = triples.stream()
+                        .sorted()
+                        .map(messageTriple -> messageTriple.line)
+                        .collect(Collectors.joining());
+                if (joined.endsWith(",")) {
+                    joined = joined.substring(0, joined.length() - 1);
+                }
+                joined = "[" + joined + "]";
+
+                try {
+                    JsonArray array = jsonParser.parse(joined).getAsJsonArray();
+                    return StreamSupport.stream(array.spliterator(), false)
+                            .map(JsonElement::getAsJsonObject)
+                            .collect(Collectors.toList());
+                } catch (JsonParseException e) {
+                    throw new RuntimeException("Failed to parse: " + joined, e);
+                }
+            };
         }
 
         @Override
         public Set<Characteristics> characteristics() {
             return Collections.emptySet();
+        }
+    }
+    static class MessageTriple implements Comparable<MessageTriple> {
+        private final String objectId;
+        private final String index;
+        private final String line;
+
+        MessageTriple(String objectId, String index, String line) {
+            this.objectId = objectId;
+            this.index = index;
+            this.line = line;
+        }
+
+        @Override
+        public int compareTo(MessageTriple other) {
+            int result;
+
+            result = objectId.compareTo(other.objectId);
+            if (result != 0) return result;
+
+            return index.compareTo(other.index);
         }
     }
 }
