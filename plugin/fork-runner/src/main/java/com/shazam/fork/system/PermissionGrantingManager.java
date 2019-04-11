@@ -1,21 +1,14 @@
 package com.shazam.fork.system;
 
-import com.android.ddmlib.AdbCommandRejectedException;
-import com.android.ddmlib.IDevice;
-import com.android.ddmlib.NullOutputReceiver;
-import com.android.ddmlib.ShellCommandUnresponsiveException;
-import com.android.ddmlib.TimeoutException;
+import com.android.ddmlib.*;
 import com.shazam.fork.Configuration;
 import com.shazam.fork.model.Permission;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.Nonnull;
+import java.io.IOException;
+import java.util.List;
 
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 import static java.lang.String.format;
@@ -53,24 +46,7 @@ public class PermissionGrantingManager {
         }
     }
 
-    public void restorePermissions(@Nonnull String applicationPackage,
-                                   @Nonnull IDevice device,
-                                   @Nonnull List<String> permissionsToRestore) {
-        if (!permissionsToRestore.isEmpty()) {
-            List<String> permissionsToGrant = new ArrayList<>(permissionsToRestore.size());
-
-            List<Permission> permissions = configuration.getApplicationInfo().getPermissions();
-            for (Permission permission : permissions) {
-                if (deviceApiLevelInRange(device, permission) && permissionsToRestore.contains(permission.getPermissionName())) {
-                    permissionsToGrant.add(permission.getPermissionName());
-                }
-            }
-
-            grantPermissions(applicationPackage, device, permissionsToGrant);
-        }
-    }
-
-    private void grantPermissions(@Nonnull String applicationPackage,
+    public void grantPermissions(@Nonnull String applicationPackage,
                                   @Nonnull IDevice device,
                                   @Nonnull List<String> permissionsToGrant) {
         if (!permissionsToGrant.isEmpty()) {
