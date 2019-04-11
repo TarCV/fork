@@ -41,6 +41,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
         Pattern testClassPattern = configuration().getTestClassPattern();
 
         return askDevicesForTests().stream()
-                /*.filter(testCaseEvent ->
+                .filter(testCaseEvent ->
                 {
                     String fullClassName = testCaseEvent.getTestClass();
 
@@ -81,15 +82,12 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                     int packagePrefixLength = 0;
                     Matcher matcher = packagePrefixPattern.matcher(fullClassName);
                     if (matcher.lookingAt()) {
-                        packagePrefixLength = matcher.regionEnd();
+                        packagePrefixLength = matcher.end();
                     }
                     String className = fullClassName.substring(packagePrefixLength);
-                    boolean matches = testClassPattern.matcher(className).matches();
 
-                    logger.info(String.format("Checking %s, matches: %s", className, matches));
-
-                    return matches;
-                })*/
+                    return testClassPattern.matcher(className).matches();
+                })
                 .collect(Collectors.toList());
     }
 
