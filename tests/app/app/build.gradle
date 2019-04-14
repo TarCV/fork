@@ -36,8 +36,8 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
-    androidTestImplementation 'com.github.tarcv.fork:fork-ondevice'
-    androidTestImplementation 'com.github.tarcv.fork:fork-client'
+    androidTestImplementation "com.github.tarcv.fork:fork-ondevice:$FORK_VERSION"
+    androidTestImplementation "com.github.tarcv.fork:fork-client:$FORK_VERSION"
 }
 
 // Execute `./gradlew --stop` to fix "com.shazam.fork.pooling.NoDevicesForPoolException: No devices found." error
