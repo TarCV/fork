@@ -103,7 +103,9 @@ class TestRun {
 		long start = System.currentTimeMillis();
 
 		try {
-			device.executeShellCommand(format("pm clear %s", applicationPackage), new NullOutputReceiver());
+			String command = format("pm clear %s", applicationPackage);
+			logger.info("Cmd: " + command);
+			device.executeShellCommand(command, new NullOutputReceiver());
 		} catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException e) {
 			throw new UnsupportedOperationException(format("Unable to clear package data (%s)", applicationPackage), e);
 		}

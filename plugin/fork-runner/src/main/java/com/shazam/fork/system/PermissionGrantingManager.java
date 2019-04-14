@@ -53,8 +53,9 @@ public class PermissionGrantingManager {
             long start = System.currentTimeMillis();
             for (String permissionToGrant : permissionsToGrant) {
                 try {
-                    device.executeShellCommand(format("pm grant %s %s",
-                            applicationPackage, permissionToGrant), NO_OP_RECEIVER);
+                    String command = format("pm grant %s %s", applicationPackage, permissionToGrant);
+                    logger.info("Cmd: " + command);
+                    device.executeShellCommand(command, NO_OP_RECEIVER);
                 } catch (TimeoutException | AdbCommandRejectedException | ShellCommandUnresponsiveException | IOException e) {
                     throw new UnsupportedOperationException(format("Unable to grant permission %s", permissionToGrant), e);
                 }
