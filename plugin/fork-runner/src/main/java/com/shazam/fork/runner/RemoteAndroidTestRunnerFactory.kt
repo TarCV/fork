@@ -98,14 +98,16 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
         private const val expectedTestPackage = "com.github.tarcv.forktestapp.test"
         private const val expectedTestRunner = "android.support.test.runner.AndroidJUnitRunner"
         val logOnlyCommandPattern =
-                ("am\\s+instrument -w -r" +
+                ("am\\s+instrument\\s+-w\\s+-r\\s+" +
+                        " -e package com.github.tarcv.test" +
+                        " -e filter com.shazam.fork.ondevice.AnnontationReadingFilter" +
                         " -e log true" +
                         """\s+$expectedTestPackage\/$expectedTestRunner""")
                         .replace(".", "\\.")
                         .replace(" -", "\\s+-")
                         .toRegex()
         val testCaseCommandPattern =
-                ("am\\s+instrument -w -r" +
+                ("am\\s+instrument\\s+-w\\s+-r\\s+" +
                         " -e filterMethod ()" +
                         " -e filter com.shazam.fork.ondevice.ClassMethodFilter" +
                         " -e filterClass ()" +
@@ -132,6 +134,10 @@ class TestAndroidTestRunnerFactory : IRemoteAndroidTestRunnerFactory {
                 """com.github.tarcv.test.ParameterizedTest#test[0]""",
                 """com.github.tarcv.test.ParameterizedTest#test[1]""",
                 """com.github.tarcv.test.ParameterizedTest#test[2]""",
+                """com.github.tarcv.test.GrantPermissionsTest#testPermissionGranted""",
+                """com.github.tarcv.test.GrantPermissionsTest#testNoPermissionByDefault""",
+                """com.github.tarcv.test.GrantPermissionsForClassTest#testPermissionGranted1""",
+                """com.github.tarcv.test.GrantPermissionsForClassTest#testPermissionGranted2""",
                 """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[0]""",
                 """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[1]""",
                 """com.github.tarcv.test.ResetPrefsTest#testPrefsAreClearedBetweenTests[2]""",
