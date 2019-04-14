@@ -10,6 +10,7 @@ import org.junit.runner.manipulation.Filter;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AnnontationReadingFilter extends Filter {
@@ -30,24 +31,10 @@ public class AnnontationReadingFilter extends Filter {
             info.put("testClass", description.getClassName());
             info.put("testMethod", description.getMethodName());
 
-            for (Annotation annotation: description.getAnnotations()) {
-                JSONObject currentAnnotationInfo = new JSONObject();
-                Class<? extends Annotation> annotationType = annotation.annotationType();
-
-                currentAnnotationInfo.put("annotationType", annotationType.getCanonicalName());
-
-                for (Method method : annotationType.getMethods()) {
-                    if (!isAnnotationParameter(method)) {
-                        continue;
-                    }
-
-                    String name = method.getName();
-                    Object value = getAnnotationParameterValue(annotation, method);
-                    currentAnnotationInfo.put(name, JSONObject.wrap(value));
-                }
-
-                annotationsInfo.put(currentAnnotationInfo);
-            }
+            // Method annotations override class ones, so they should be added last
+            appendAnnotationInfos(Arrays.asList(description.getTestClass().getAnnotations()),
+                    annotationsInfo);
+            appendAnnotationInfos(description.getAnnotations(), annotationsInfo);
 
             info.put("annotations", annotationsInfo);
 
@@ -63,6 +50,27 @@ public class AnnontationReadingFilter extends Filter {
         }
 
         return true;
+    }
+
+    private void appendAnnotationInfos(Iterable<Annotation> annotations, JSONArray annotationsInfo) throws JSONException {
+        for (Annotation annotation: annotations) {
+            JSONObject currentAnnotationInfo = new JSONObject();
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+
+            currentAnnotationInfo.put("annotationType", annotationType.getCanonicalName());
+
+            for (Method method : annotationType.getMethods()) {
+                if (!isAnnotationParameter(method)) {
+                    continue;
+                }
+
+                String name = method.getName();
+                Object value = getAnnotationParameterValue(annotation, method);
+                currentAnnotationInfo.put(name, JSONObject.wrap(value));
+            }
+
+            annotationsInfo.put(currentAnnotationInfo);
+        }
     }
 
     private Object getAnnotationParameterValue(Annotation annotation, Method method) {

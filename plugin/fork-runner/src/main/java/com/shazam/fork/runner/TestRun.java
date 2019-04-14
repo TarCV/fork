@@ -48,10 +48,11 @@ class TestRun {
 
 	public void execute() {
 		String applicationPackage = testRunParameters.getApplicationPackage();
+		String testPackage = testRunParameters.getTestPackage();
 		IDevice device = testRunParameters.getDeviceInterface();
 
 		RemoteAndroidTestRunner runner =
-				remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(testRunParameters.getTestPackage(), testRunParameters.getTestRunner(), device);
+				remoteAndroidTestRunnerFactory.createRemoteAndroidTestRunner(testPackage, testRunParameters.getTestRunner(), device);
 
 		TestCaseEvent test = testRunParameters.getTest();
 		String testClassName = test.getTestClass();
@@ -81,10 +82,11 @@ class TestRun {
 		}
 
 		clearPackageData(device, applicationPackage);
-		clearPackageData(device, testRunParameters.getTestPackage());
+		clearPackageData(device, testPackage);
 
 		List<String> permissionsToGrant = testRunParameters.getTest().getPermissionsToGrant();
 		permissionGrantingManager.grantPermissions(applicationPackage, device, permissionsToGrant);
+		permissionGrantingManager.grantPermissions(testPackage, device, permissionsToGrant);
 
 		try {
 			logger.info("Cmd: " + runner.getAmInstrumentCommand());
