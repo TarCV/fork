@@ -2,7 +2,7 @@ package com.shazam.fork.suite;
 
 /*
  * Copyright 2016 Shazam Entertainment Limited
- * Derivative work is Copyright 2018 TarCV
+ * Derivative work is Copyright 2018-2019 TarCV
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
  *
@@ -51,6 +51,7 @@ import static com.shazam.fork.Utils.namedExecutor;
 import static com.shazam.fork.injector.ConfigurationInjector.configuration;
 import static com.shazam.fork.injector.system.InstallerInjector.installer;
 import static com.shazam.fork.suite.ForkTestSuiteLoader.keyValueArraysToProperties;
+import static java.lang.Thread.sleep;
 import static java.util.function.Function.identity;
 
 public class JUnitTestSuiteLoader implements TestSuiteLoader {
@@ -154,6 +155,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                                             try {
                                                 runner.run(testRunListeners);
 
+                                                sleep(2500); // make sure all logcat messages are read
                                                 BinaryOperator<JsonObject> firstAlways = (o1, o2) -> o1;
                                                 Map<TestIdentifier, JsonObject> infoMessages = extractTestInfoMessages(logCatCollector.getMessages())
                                                         .stream()
@@ -163,7 +165,7 @@ public class JUnitTestSuiteLoader implements TestSuiteLoader {
                                                             return new TestIdentifier(testClass, testMethod);
                                                         }, identity(), firstAlways));
                                                 testInfoMessages.putAll(infoMessages);
-                                            } catch (ShellCommandUnresponsiveException | TimeoutException e) {
+                                            } catch (ShellCommandUnresponsiveException | TimeoutException | InterruptedException e) {
                                                 logger.warn("Test runner got stuck and test list collection was interrupeted. " +
                                                         " Depending on number of available devices some tests will not be run." +
                                                         " You can increase the timeout in settings if it's too strict");
