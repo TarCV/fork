@@ -17,8 +17,6 @@ import static com.shazam.chimprunner.injector.ConfigurationInjector.configuratio
 
 public class InstallerInjector {
 
-    private static final boolean AUTO_GRANT_PERMISSIONS = true;
-
     private InstallerInjector() {
     }
 
@@ -28,6 +26,6 @@ public class InstallerInjector {
         String instrumentationPackage = configuration.getInstrumentationPackage();
 
         return new Installer(applicationPackage, instrumentationPackage, configuration.getApplicationApk(),
-                configuration.getInstrumentationApk(), AUTO_GRANT_PERMISSIONS);
+                configuration.getInstrumentationApk());
     }
 }
