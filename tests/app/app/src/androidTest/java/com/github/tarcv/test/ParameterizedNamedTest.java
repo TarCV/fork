@@ -39,6 +39,6 @@ public class ParameterizedNamedTest {
 
     @Parameters(name = "param = {0}")
     public static Object[] data() {
-        return new Object[] { 1, 2, 3 };
+        return new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 };
     }
 }
