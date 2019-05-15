@@ -106,6 +106,7 @@ class ForkRunTask extends DefaultTask implements VerificationTask {
                 .withAutoGrantPermissions(autoGrantPermissions)
                 .withExcludedAnnotation(excludedAnnotation)
                 .withForkIntegrationTestRunType(forkIntegrationTestRunType)
+                .withDdmTermination(false) // AGP doesn't terminate DdmLib, neither should Tongs
                 .build();
 
         boolean success = new Fork(configuration).run()
