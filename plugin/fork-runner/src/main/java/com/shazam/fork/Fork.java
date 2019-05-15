@@ -30,9 +30,11 @@ public final class Fork {
 
     private final ForkRunner forkRunner;
     private final File output;
+    private final boolean terminateDdm;
 
     public Fork(Configuration configuration) {
         this.output = configuration.getOutput();
+        this.terminateDdm = configuration.shouldTerminateDdm();
         setConfiguration(configuration);
         this.forkRunner = forkRunner();
     }
@@ -50,7 +52,9 @@ public final class Fork {
 		} finally {
             long duration = millisSinceNanoTime(startOfTestsMs);
             logger.info(formatPeriod(0, duration, "'Total time taken:' H 'hours' m 'minutes' s 'seconds'"));
-            adb().terminate();
+            if (terminateDdm) {
+                adb().terminate();
+            }
 		}
 	}
 }

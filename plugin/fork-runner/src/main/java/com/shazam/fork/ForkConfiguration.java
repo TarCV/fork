@@ -69,6 +69,8 @@ public interface ForkConfiguration {
 
     ApplicationInfo getApplicationInfo();
 
+    boolean shouldTerminateDdm();
+
     enum ForkIntegrationTestRunType {
         NONE,
         STUB_PARALLEL_TESTRUN,

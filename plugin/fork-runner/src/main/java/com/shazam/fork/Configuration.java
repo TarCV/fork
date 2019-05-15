@@ -60,6 +60,7 @@ public class Configuration implements ForkConfiguration {
     private final boolean autoGrantPermissions;
     private final String excludedAnnotation;
     private final ForkIntegrationTestRunType forkIntegrationTestRunType;
+    private final boolean terminateDdm;
 
     private ApplicationInfo applicationInfo;
 
@@ -87,6 +88,7 @@ public class Configuration implements ForkConfiguration {
         this.excludedAnnotation = builder.excludedAnnotation;
         this.forkIntegrationTestRunType = builder.forkIntegrationTestRunType;
         this.applicationInfo = builder.applicationInfo;
+        this.terminateDdm = builder.terminateDdm;
     }
 
     @Override
@@ -213,6 +215,11 @@ public class Configuration implements ForkConfiguration {
     }
 
     @Override
+    public boolean shouldTerminateDdm() {
+        return terminateDdm;
+    }
+
+    @Override
     public ForkIntegrationTestRunType getForkIntegrationTestRunType() {
         return forkIntegrationTestRunType;
     }
@@ -241,6 +248,7 @@ public class Configuration implements ForkConfiguration {
         private String excludedAnnotation;
         private ApplicationInfo applicationInfo;
         private ForkIntegrationTestRunType forkIntegrationTestRunType = NONE;
+        private boolean terminateDdm = true;
 
         public static Builder configuration() {
             return new Builder();
@@ -338,6 +346,11 @@ public class Configuration implements ForkConfiguration {
 
         public Builder withForkIntegrationTestRunType(ForkIntegrationTestRunType forkIntegrationTestRunType) {
             this.forkIntegrationTestRunType = forkIntegrationTestRunType;
+            return this;
+        }
+
+        public Builder withDdmTermination(boolean terminateDdm) {
+            this.terminateDdm = terminateDdm;
             return this;
         }
 
